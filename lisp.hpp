@@ -601,7 +601,9 @@ Bool unpack_all_args(Expr args, char const * fmt, ...);
 int unpack_args(Expr args, char const * fmt, ...);
 
 /* all b_* functions have the same signature: ApplyFun */
+//TODO: we still need doc on what the actual in-language signatures are
 
+//TODO: use typedef for ApplyFun function?
 Expr b_eq(Expr args, Expr env, void * user);
 Expr b_equal(Expr args, Expr env, void * user);
 
