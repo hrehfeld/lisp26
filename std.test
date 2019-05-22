@@ -1,0 +1,277 @@
+
+(t => t)
+
+((car   '(1 2 3)) => 1)
+((cadr  '(1 2 3)) => 2)
+((caddr '(1 2 3)) => 3)
+
+;;; type
+
+((type nil)        => nil)
+((type (gensym))   => gensym)
+((type 0)          => fixnum)
+((type 'cons)      => symbol)
+
+((type '())        => nil)
+((type '(1))       => cons)
+((type '(1 2))     => cons)
+((type '(1 . 2))   => cons)
+
+((type "foo")      => string)
+
+;;((type 1111111111111111111) => bignum) ; TODO
+
+;;((type (malloc 4)) => pointer) ; TODO this leaks memory and requires malloc
+
+((type #(1 2 3))   => vector)
+
+((type cons) => builtin)
+
+((type *read-stream*) => stream)
+
+;;; let
+
+((let ((foo 42)) foo) => 42)
+((let () 123) => 123)
+((let ((foo 1)
+       (bar 2))
+   foo)
+   => 1)
+
+((let () 123 456) => 456)
+
+;;; return
+
+((block nil 1 2 3 4) => 4)
+((block nil (return 42)) => 42)
+((block nil 1 2 (return 111) 3 4) => 111)
+
+;;; rplaca/rplacd
+
+((let ((x (cons 1 2))) (rplaca x 'foo)) => (foo . 2))
+((let ((x (cons 1 2))) (rplacd x 'foo)) => (1 . foo))
+
+((let () (defun foo () (return 1) 2) (foo)) => 1)
+
+;;; catch
+
+((catch nil 1 2 3 4) => 4)
+((catch nil (throw nil 42)) => 42)
+((catch nil 1 2 (throw nil 111) 3 4) => 111)
+
+;;; not
+
+((not nil)         => t)
+((nil? nil)        => t)
+((not (nil? 'foo)) => t)
+((not (not 0))     => t) ; TODO do we want this?
+((not (not ""))    => t)
+
+;;; and
+
+((and) => t)
+((and t) => t)
+((and t t) => t)
+((and t nil) => nil)
+((and nil (assert nil)) => nil) ; NOTE assert
+
+;;; or
+
+((or) => t)
+((or nil) => nil)
+
+((or 'foo)      => foo)
+((or nil 'foo)  => foo)
+((or 'bar 'foo) => bar)
+
+;;; cond
+
+((cond (t 'x)) => x)
+((cond (nil 'x) (t 'y)) => y)
+((cond (t 'a) (nil 'b) (t 'c)) => a)
+
+;;; funcall
+
+((funcall (lambda (x) t) 123) => t)
+
+;;; push
+
+((let ((foo '()))
+   (push 1 foo)
+   (push 2 foo)
+   (push 3 foo)
+   foo)
+ => (3 2 1))
+
+;;; nreverse
+
+((nreverse '()) => ())
+((nreverse '(a . b)) => (b . a))
+((nreverse '(a b c d)) => (d c b a))
+((nreverse '(a b c . d)) => (d c b . a)) ; NOTE the output will look wrong ;)
+
+;;; index
+
+((index "ofoo" "") => 0)
+((index "ofoo" "o") => 0)
+((index "ofoo" "f") => 1)
+((index "ofoo" "x") => -1)
+((index "ofoo" "oo") => 2)
+((index "ofoo" "bbbbbbb") => -1)
+((index "ofoo" "ofooledyou") => -1)
+((index "" "blag") => -1)
+
+((index "" "") => 0)
+
+;;; len
+
+((len '()) => 0)
+((len '(a b c)) => 3)
+
+((len "") => 0)
+((len "example") => 7)
+
+;;; backquote/unquote/unqoute-splicing
+
+((let ((x 123)) `x) => x)
+((let ((x 123)) `,x) => 123)
+((let ((x 123)) `,`x) => x)
+((let ((x (list 1 2 3))) `,x) => (1 2 3))
+((let ((x (list 1 2 3))) `(,@x)) => (1 2 3))
+((let ((x (list 1 2 3))) `(0 ,@x 4)) => (0 1 2 3 4))
+
+;;; startswith
+
+((startswith "foo" "foo" ) => t)
+((startswith "foo" "bar" ) => nil)
+((startswith "foo" "fo"  ) => t)
+((startswith "foo" "foor") => nil)
+((startswith "foo" ""    ) => t)
+((startswith ""    ""    ) => t)
+
+;;; endswith
+
+((endswith "foo" "foo" ) => t)
+((endswith "foo" "bar" ) => nil)
+((endswith "foo" "oo"  ) => t)
+((endswith "foo" "ooo") => nil)
+((endswith "foo" ""    ) => t)
+((endswith ""    ""    ) => t)
+
+;;; join
+
+((join " " '("a" "b" "c")) => "a b c")
+((join "\n" '("a" "b" "c")) => "a
+b
+c")
+
+((join "foo" '()) => "")
+
+;;; random "complex" tests
+
+((join ", " (map str (range 4))) => "0, 1, 2, 3")
+
+;;; split
+
+
+((split "a b" " ") => ("a" "b"))
+((split "a
+b" "\n") => ("a" "b"))
+((split "" " ") => ("")) ; this follows python, not sure we want this
+
+;; should fail
+;; TODO use syntax like ((split "" "") <= fails)
+;;((split "" "") => ())
+
+;;; string->vector
+
+((string->vector "") => #())
+((string->vector "a") => #(97))
+
+;;; string-lt
+
+((string:lt "a" "b") => t)
+((string:lt "b" "b") => nil)
+((string:lt "b" "a") => nil)
+((string:lt "baa" "a") => nil)
+((string:lt "a" "aaaa") => t)
+
+;;; sorted?
+
+((sorted? #(1 2 3)) => t)
+((sorted? #(1 2 2)) => t)
+((sorted? #(1 2 1)) => nil)
+
+((sorted? '("a" "b")) => t)
+((sorted? '("b" "a")) => nil)
+
+;;; sort
+
+;; TODO
+;;((let ((v #(1 2 3))) (sort v) v) => #(1 2 3))
+;;((let ((v #(3 2 1))) (sort v) v) => #(1 2 3))
+;;((let ((v #(1 1 1))) (sort v) v) => #(1 1 1))
+
+;;((let ((v #()))      (sort v) v) => #())
+;;((let ((v #("foo"))) (sort v) v) => #("foo"))
+
+;; doadj ; TODO this is not testing anything
+
+;;((doadj (a b #(1 2 3)) (println a b)) => nil)
+;;((doadj (a b #(1 2)) (println a b)) => nil)
+;;((doadj (a b #(1)) (println a b)) => nil)
+;;((doadj (a b #()) (println a b)) => nil)
+;;
+;;((doadj (a b "foo")
+;;   (println (map char->string (list a b))))
+;; => nil)
+
+;;; defgeneric/defmethod
+
+((progn
+   (defgeneric test (x))
+   (defmethod test ((string x)) 'a)
+   (defmethod test ((fixnum x)) 'b)
+
+   (list (test "foo")
+         (test 123)))
+ => (a b))
+
+;;; with-output-to-string
+
+((with-output-to-string (s) (stream-put-char s 65)) => "A")
+
+((with-output-to-string (s)
+   (dotimes (i 3)
+     (stream-put-char s (+ 65 i)))) => "ABC")
+
+;;; char(s)->string
+
+((chars->string '(68 68 65)) => "DDA")
+((chars->string '(99 98 97)) => "cba")
+
+((char->string 84) => "T")
+((char->string 231) => "ç") ; TODO
+((char->string 12363) => "か") ; TODO
+
+;;; format
+
+((format nil "") => "")
+((format nil "blah") => "blah")
+((format nil "{}" 'foo) => "foo")
+((format nil "{}" "bar") => "bar")
+
+;;; dotimes
+
+((let ((n 12))
+   (dotimes (i 4)
+     (= n (+ n 2)))
+   n)
+ => 20)
+
+;; TODO?
+;;((let ((n 12))
+;;   (dotimes 4
+;;     (= n (+ n 2)))
+;;   n)
+;; => 20)

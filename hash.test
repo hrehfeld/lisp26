@@ -1,0 +1,33 @@
+
+((let ((h (make-hash)))) => nil)
+
+((let ((h (make-hash)))
+   (hash-put h 'key 123))
+ => nil)
+
+((let ((h (make-hash)))
+   (hash-put h 'key 123)
+   (hash-has h 'key))
+ => t)
+
+((let ((h (make-hash)))
+   (hash-put h 'key 123)
+   (hash-has h 'not))
+ => nil)
+
+((let ((h (make-hash)))
+   (hash-put h 'key 123)
+   (hash-get h 'key))
+ => 123)
+
+((let ((h (make-hash)))
+   (hash-put h 'key 123)
+   (hash-put h 'key "foo")
+   (hash-get h 'key))
+ => "foo")
+
+((let ((h (make-hash equal-hash equal)))
+   (hash-put h "key" 123)
+   (hash-put h "key" "foo")
+   (hash-get h "key"))
+ => "foo")

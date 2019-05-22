@@ -1,0 +1,56 @@
+
+(nil => nil)
+(123 => 123)
+(-12 => -12)
+("foo" => "foo")
+
+;;; quote
+
+((quote foo) => foo)
+
+;;; if
+
+((if 't 1 2) => 1)
+((if nil 1 2) => 2)
+
+;;; eq
+
+((eq 'a 'a) => t)
+((eq 'a 'b) => nil)
+
+;;; cons/car/cdr/...
+
+((cons 1 2) => (1 . 2))
+((car (cons 1 2)) => 1)
+((cdr (cons 1 2)) => 2)
+
+;;; lambda
+
+(((lambda (x) x) 1) => 1)
+(((lambda (x) x) 2) => 2)
+
+(((lambda () 'foo)) => foo)
+
+(((lambda args args) 1 2 3) => (1 2 3))
+(((lambda (x y z) `(,x ,y ,z)) 'a 'b 'c) => (a b c))
+
+(((lambda (x . y) (cons x y)) 'a 'b 'c) => (a b c))
+
+(((lambda ((a b) c) `(,a ,b ,c)) '(1 2) 3) => (1 2 3))
+
+;;; syntax (macro literal)
+
+(((syntax (x) x) 1) => 1)
+
+(((lambda (my/if) (my/if 't 1 2)) (syntax (a b c)
+                                   (cons 'if (cons a (cons b (cons c nil))))))
+ => 1)
+(((lambda (my/if) (my/if nil 1 2)) (syntax (a b c)
+                                     (cons 'if (cons a (cons b (cons c nil))))))
+ => 2)
+
+;;; block
+
+((block nil 1 2 3 4) => 4)
+((block nil (return-from nil 42)) => 42)
+((block nil 1 2 (return-from nil 111) 3 4) => 111)

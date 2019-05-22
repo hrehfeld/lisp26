@@ -1,0 +1,8 @@
+/lisp
+/lide
+/hello
+/blah
+/comp
+*.o
+.DS_Store
+__pycache__

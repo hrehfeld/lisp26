@@ -1,0 +1,19 @@
+
+((rope->string (make-rope "foo")) => "foo")
+
+((rope->string (rope:+ (make-rope "foo") (make-rope "bar"))) => "foobar")
+
+((rope:char-at (make-rope "foo") 0) => 102)
+
+((rope:char-at (rope:+ (make-rope "foo") (make-rope "bar")) 0) => 102)
+((rope:char-at (rope:+ (make-rope "foo") (make-rope "bar")) 2) => 111)
+((rope:char-at (rope:+ (make-rope "foo") (make-rope "bar")) 3) =>  98)
+((rope:char-at (rope:+ (make-rope "foo") (make-rope "bar")) 5) => 114)
+
+;; internal tests
+
+((make-rope "foo") => (leaf 3 "foo"))
+((rope:+ (make-rope "foo") (make-rope "quux")) => (node 7
+                                                        (leaf 3 "foo")
+                                                        (leaf 4 "quux")))
+

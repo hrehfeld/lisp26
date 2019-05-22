@@ -1,0 +1,37 @@
+
+((EVAL 'nil nil) => nil)
+
+((EVAL '123 nil) => 123)
+
+((EVAL '"foo" nil) => "foo")
+
+((EVAL '(quote foo) nil) => foo)
+
+((EVAL '(if 123 1 2) nil) => 1)
+((EVAL '(if nil 1 2) nil) => 2)
+
+((EVAL '(eq 'a 'a) nil) => t)
+((EVAL '(eq 'a 'b) nil) => nil)
+
+((EVAL '(cons 1 2) nil) => (1 . 2))
+
+((EVAL '(car (cons 1 2)) nil) => 1)
+((EVAL '(cdr (cons 1 2)) nil) => 2)
+
+((EVAL '((lambda (x) x) 1) nil) => 1)
+((EVAL '((lambda (x) x) 2) nil) => 2)
+
+((EVAL '((syntax (x) x) 1) nil) => 1)
+
+((let ((env (MAKE-CORE-ENV)))
+   (map (lambda (exp) (EVAL exp env))
+        '(nil
+          123
+          "foo"
+          (quote foo)
+          (if t 1 2))))
+ => (nil
+     123
+     "foo"
+     foo
+     1))
