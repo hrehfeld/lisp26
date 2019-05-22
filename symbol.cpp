@@ -238,6 +238,7 @@ void symbol_gc(Symbol * symbol, U64 num_roots, Expr ** roots)
 
 Bool is_symbol(Expr exp)
 {
+	//TODO: needs ifdef for different nil configs for max performance?
     return exp == nil || expr_type(exp) == TYPE_SYMBOL;
 }
 

@@ -228,6 +228,7 @@ Bool is_nil(Expr exp);
 
 inline static Bool eq(Expr a, Expr b)
 {
+	//TODO why is this in the define and different than above version?
     return a == b;
 }
 
@@ -237,6 +238,7 @@ inline static Bool eq(Expr a, Expr b)
 
 #if SYMBOL_CACHE
 
+// TODO: why not this?
 //#define SYM_CONST(data)      MAKE_EXPR(TYPE_SYMBOL, U64VAL(data))
 #define SYM_CONST(data)      data##03
 
@@ -329,10 +331,12 @@ inline static Bool eq(Expr a, Expr b)
 #define SYM_equal            QUOTE(equal)
 #define SYM_gensym           QUOTE(gensym)
 
+//TODO rename to Symbols
 struct Symbol
 {
     U64 num;
     U64 max;
+	//TODO: r/w? read write?
     char ** names_r;
     char ** names_w;
 #if SYMBOL_CACHE
@@ -344,6 +348,7 @@ void symbol_init(Symbol * symbol);
 void symbol_quit(Symbol * symbol);
 void symbol_gc(U64 num_roots, Expr ** roots);
 
+//TODO: inline
 Bool is_symbol(Expr exp);
 
 Expr make_symbol(char const * name);
@@ -367,6 +372,7 @@ typedef struct
     Expr a, b;
 } Pair;
 
+// TODO: rename to Conses?
 typedef struct
 {
     U64    num;
@@ -379,6 +385,7 @@ void cons_quit();
 void cons_gc(U64 num_roots, Expr ** roots);
 void cons_install(Expr env);
 
+//TODO inline? 
 Bool is_cons(Expr exp);
 
 Expr cons(Expr a, Expr b);
@@ -407,6 +414,7 @@ Expr f_cdr(Expr exp);
 
 #if ENABLE_GENSYM
 
+//TODO: Gensyms
 struct Gensym
 {
     U64 counter;
@@ -418,6 +426,7 @@ void gensym_quit();
 Bool is_gensym(Expr exp);
 Expr make_gensym(Gensym * gensym);
 
+//TODO: what is this?
 inline static Expr f_gensym(Gensym * gensym)
 {
     return make_gensym(gensym);
@@ -575,7 +584,7 @@ void bind_vector(Expr env);
 
 #endif
 
-/* builtin ****/
+/* builtin -- functions defined in c / natively ****/
 
 Bool is_builtin_fun(Expr exp);
 Bool is_builtin_mac(Expr exp);
@@ -591,7 +600,7 @@ void * builtin_user(Expr exp);
 Bool unpack_all_args(Expr args, char const * fmt, ...);
 int unpack_args(Expr args, char const * fmt, ...);
 
-/* all b_* functions have the same signature */
+/* all b_* functions have the same signature: ApplyFun */
 
 Expr b_eq(Expr args, Expr env, void * user);
 Expr b_equal(Expr args, Expr env, void * user);
