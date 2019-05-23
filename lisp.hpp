@@ -233,9 +233,10 @@ inline static Bool eq(Expr a, Expr b)
 
 #if SYMBOL_CACHE
 
-// TODO: why not this?
-//#define SYM_CONST(data)      MAKE_EXPR(TYPE_SYMBOL, U64VAL(data))
-#define SYM_CONST(data)      data##03
+#define SYM_CONST(data)      MAKE_EXPR(TYPE_SYMBOL, U64VAL(data))
+/* TODO: if the above fails, we need some variant of this
+   but keep in mind that this doesn't reflect ifdefs and TYPE_ defs */
+/* #define SYM_CONST(data)      data##03 */
 
 #define SYM_DOT              SYM_CONST(0x00)
 #define SYM_ERROR            SYM_CONST(0x01)
