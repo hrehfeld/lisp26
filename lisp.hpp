@@ -724,22 +724,20 @@ void env_alias(Expr env, Expr var, Expr otr)
     env_def(env, var, env_lookup(env, otr));
 }
 
+/*
+TODO note that you can do stuff like this, so might as well return NIL
+
+if (Expr const foo = env_get(...))
+{
+    printf("%d\n", i);
+}
+*/
 inline static
 Expr env_get(Expr env, Expr var)
 {
     return env_lookup(env, var);
 }
 
-/*
-
-TODO note that you can do stuff like this, so might as well return NIL
-
-if (int const i = 42)
-{
-    printf("%d\n", i);
-}
-
-*/
 
 Expr env_outer(Expr env);
 Expr env_outermost(Expr env);
