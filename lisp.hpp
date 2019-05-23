@@ -675,7 +675,9 @@ Expr append(Expr a, Expr b);
 Expr nreverse(Expr list);
 Expr assoc(Expr item, Expr list);
 
-/* closure ****/
+/* closure 
+   functions/macros defined in lisp that save surrounding env
+****/
 
 void closure_init();
 void closure_quit();
