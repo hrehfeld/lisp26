@@ -943,7 +943,10 @@ Expr f_read_file(Expr ifn);
 
 Expr f_escape(Expr str);
 
-/* hash_impl **/
+/* hash_impl 
+   
+   hash set implementation for internal interpreter use
+**/
 
 void make_hash_set(HashSetU64 * set);
 void free_hash_set(HashSetU64 * set);
