@@ -876,6 +876,10 @@ Expr f_coerce(Expr exp, Expr type);
  - always return an Expr (possibly NIL)
  - only have Expr arguments
  - don't take varargs (TODO?)
+
+ internal utility functions
+ follow "lisp calling conventions" (only exprs in signature)
+ implemented natively for performance reasons, but could be implemented in lisp for bootstrapping
 */
 
 Bool is_tagged(Expr exp, Expr tag);
