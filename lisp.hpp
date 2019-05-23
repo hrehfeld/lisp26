@@ -211,11 +211,6 @@ inline static Bool is_nil(Expr exp)
 
 #endif
 
-inline static Bool eq(Expr a, Expr b)
-{
-    return expr_bits(a) == expr_bits(b);
-}
-
 #else
 
 Expr make_expr(U64 type, U64 data);
@@ -226,13 +221,13 @@ U64 expr_data(Expr exp);
 Bool is_nil(Expr exp);
 #endif
 
+#endif
+
 inline static Bool eq(Expr a, Expr b)
 {
-	//TODO why is this in the define and different than above version?
-    return a == b;
+    return expr_bits(a) == expr_bits(b);
 }
 
-#endif
 
 /* symbol *****/
 
