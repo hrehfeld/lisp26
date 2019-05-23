@@ -976,6 +976,9 @@ U64 spooky_hash64(size_t length, void const * message, U64 seed);
 
 F64 get_time();
 
+/*
+  time until out of scope
+*/
 class Profiler
 {
 public:
