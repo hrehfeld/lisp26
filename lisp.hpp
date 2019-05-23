@@ -963,7 +963,11 @@ void show_set(HashSetU64 const * set);
 U64 hash_u64(U64 value);
 U64 hash_str(char const * str);
 
-/* spooky *****/
+/* spooky
+
+   just hash function helpers
+
+ *****/
 
 U32 spooky_hash32(size_t length, void const * message, U32 seed);
 U64 spooky_hash64(size_t length, void const * message, U64 seed);
