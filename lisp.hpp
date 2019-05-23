@@ -327,7 +327,7 @@ inline static Bool eq(Expr a, Expr b)
 #define SYM_equal            QUOTE(equal)
 #define SYM_gensym           QUOTE(gensym)
 
-//TODO rename to Symbols
+//TODO rename to SymbolState
 struct Symbol
 {
     U64 num;
@@ -410,7 +410,7 @@ Expr f_cdr(Expr exp);
 
 #if ENABLE_GENSYM
 
-//TODO: Gensyms
+//TODO: rename GensymState
 struct Gensym
 {
     U64 counter;
