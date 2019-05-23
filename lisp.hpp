@@ -817,6 +817,8 @@ Expr eq_hash(Expr exp);
 void hash_init();
 void hash_quit();
 
+/* hash => CL hash maps */
+
 Bool is_hash(Expr exp);
 Expr make_hash();
 
