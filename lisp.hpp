@@ -828,6 +828,7 @@ Bool hash_has(Expr hash, Expr key);
 Expr hash_get(Expr hash, Expr key);
 void hash_put(Expr hash, Expr key, Expr val);
 
+/** bind builtins */
 void hash_bind(Expr env);
 
 #endif
