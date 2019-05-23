@@ -422,12 +422,6 @@ void gensym_quit();
 Bool is_gensym(Expr exp);
 Expr make_gensym(Gensym * gensym);
 
-//TODO: what is this?
-inline static Expr f_gensym(Gensym * gensym)
-{
-    return make_gensym(gensym);
-}
-
 void p_gensym(PrintFun rec, Expr out, Expr exp);
 
 #endif
