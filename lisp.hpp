@@ -596,7 +596,7 @@ void * builtin_user(Expr exp);
 Bool unpack_all_args(Expr args, char const * fmt, ...);
 int unpack_args(Expr args, char const * fmt, ...);
 
-//TODO: use typedef for ApplyFun function?
+//TODO: use macro so signature is not repeated
 Expr b_eq(Expr args, Expr env, void * user);
 Expr b_equal(Expr args, Expr env, void * user);
 
