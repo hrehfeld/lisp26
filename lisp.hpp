@@ -332,7 +332,7 @@ struct Symbol
 {
     U64 num;
     U64 max;
-	//TODO: r/w? read write?
+	//TODO: rename to read write
     char ** names_r;
     char ** names_w;
 #if SYMBOL_CACHE
