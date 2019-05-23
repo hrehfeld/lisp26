@@ -1008,11 +1008,17 @@ private:
     F64 t0;
 };
 
-/* meta *******/
+/* meta 
+   bind interpreter internals
 
+*******/
 void meta_install(Expr env);
 
-/* system *****/
+/* system
+
+global state
+
+*****/
 
 struct System
 {
