@@ -803,7 +803,11 @@ Expr make_error(char const * file, int line, char const * fmt, ...);
 void show_backtrace();
 void show_error_context();
 
-/* hash *******/
+/* hash
+   
+   hash functions for expressions
+
+*******/
 
 #if ENABLE_HASH
 
