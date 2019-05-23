@@ -574,7 +574,13 @@ void bind_vector(Expr env);
 
 #endif
 
-/* builtin -- functions defined in c / natively ****/
+/* builtin ****/
+/* all b_* functions have the same signature: ApplyFun 
+   builtins are functions usually called from within eval that require the current env
+   first argument args is the list of args
+                  env is the current environment
+                  user state supplied at creation time that will be available for every call
+ */
 
 Bool is_builtin_fun(Expr exp);
 Bool is_builtin_mac(Expr exp);
