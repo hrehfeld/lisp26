@@ -833,7 +833,9 @@ void hash_bind(Expr env);
 
 #endif
 
-/* coerce *****/
+/* coerce 
+   between C and lisp types
+*****/
 
 /* x_as_y -> reinterprets/truncates */
 /* x_to_y -> may throw errors */
