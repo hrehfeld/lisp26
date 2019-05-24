@@ -60,69 +60,79 @@
           (vals (cdr pair)))
       (helper vars vals))))
 
-(defun blah (code env)
-  (defun comp-default (stmt prefix env-name)
+(defun make-bindings (args)
+  (let ((bindings (map (lambda (x) (+ "env_def(tmp, QUOTE(" (str x) "), car(itr)); itr = cdr(itr);")) args)))
+    (when bindings
+      (push "Expr itr = args;" bindings))
+    bindings))
+
+(defun compile-default (stmt prefix env-name)
     (+ prefix "eval_string(" (escape (repr stmt)) ", " env-name ");"))
 
-  (defun render-code (code ctx env)
-    (let ((ret '())
-          (env-name (if ctx "tmp" "env"))
-          (prefix (if ctx "ret = " "")))
-      (dolist (stmt code)
-        (cond ((cons? stmt)
-               (let* ((op (car stmt))
-                      (args (cdr stmt))
-                      (it (env-find env op)))
-                 (if (and nil it)
-                     (progn
-                       (push (+ "// " (repr stmt)) ret)
-                       (push (+ prefix (mangle op) "(nil, " env-name "); // TODO add args") ret))
+(defun render-code (code ctx env)
+  (let ((ret '())
+        (env-name (if ctx "tmp" "env"))
+        (prefix (if ctx "ret = " "")))
+    (dolist (stmt code)
+      (cond ((cons? stmt)
+             (let* ((op (car stmt))
+                    (args (cdr stmt))
+                    (fun (env-find env op)))
+               (if fun
+                   (progn
+                     (push (+ "// " (repr stmt)) ret)
+                     (push (+ prefix (mangle op) "(nil, " env-name "); // TODO add args") ret))
 
-                     (push (comp-default stmt prefix env-name) ret))))
+                 (push (compile-default stmt prefix env-name) ret))))
 
-              ;;((cons? stmt)
-              ;; (let ((op (car stmt)))
-              ;;   (let ((itr (env-find env op)))
-              ;;     (if itr
-              ;;         (push (+ (mangle (car itr)) "(nil, nil);") ret)
-              ;;         (push (comp-default stmt env-name) ret)))))
+            ;;((cons? stmt)
+            ;; (let ((op (car stmt)))
+            ;;   (let ((itr (env-find env op)))
+            ;;     (if itr
+            ;;         (push (+ (mangle (car itr)) "(nil, nil);") ret)
+            ;;         (push (compile-default stmt env-name) ret)))))
 
-              ((println? stmt env) ; TODO generalize this
-               (push (+ "// " (repr stmt)) ret)
-               (push (+ prefix "b_println(read_from_string(" (escape (repr (map std:eval (cdr stmt)))) "), env, NULL);") ret)) ; TODO need to drop the args
+            ((println? stmt env) ; TODO generalize this
+             (push (+ "// " (repr stmt)) ret)
+             (push (+ prefix "b_println(read_from_string(" (escape (repr (map std:eval (cdr stmt)))) "), env, NULL);") ret)) ; TODO need to drop the args
 
-              (t
-               (push (comp-default stmt prefix env-name) ret))))
+            (t
+             (push (compile-default stmt prefix env-name) ret))))
 
-      (nreverse ret)))
+    (nreverse ret)))
+
+(defun compile-defun (env name params body)
+  (env-bind env name name)
+  (let ((bindings (make-bindings params)))
+    (emit-tree `(,(+ "Expr " (mangle name) "(Expr args, Expr env)")
+                 "{"
+                 ("Expr ret = nil;"
+                  "Expr tmp = make_env(env);"
+                  ,@bindings
+                  ,@(render-code body name env)
+                  "return ret;")
+                 "}")))  )
+
+(defun blah (code env)
+  
+
+  
+
+  
 
   ;; TODO add a flag to disable this
   (emit-tree '(""
                "#define LISP_IMPLEMENTATION"
                "#include \"runtime.hpp\""))
 
-  (defun make-bindings (args)
-    (let ((ret nil))
-      (when args
-        (= ret (map (lambda (x) (+ "env_def(tmp, QUOTE(" (str x) "), car(itr)); itr = cdr(itr);")) args))
-        (push "Expr itr = args;" ret))
-      ret))
+  
 
   (dolist (stmt code)
     (cond ((defun? stmt)
-           (stream-put-string *print-stream* "\n// ")
+           (put-string "\n// ")
            (emit-tree (render-stmt stmt nil))
            (let (((_ name args . body) stmt))
-             (env-bind env name name)
-             (let ((bindings (make-bindings args)))
-               (emit-tree `(,(+ "Expr " (mangle name) "(Expr args, Expr env)")
-                             "{"
-                             ("Expr ret = nil;"
-                              "Expr tmp = make_env(env);"
-                              ,@bindings
-                              ,@(render-code body stmt env)
-                              "return ret;")
-                             "}")))))
+             (compile-defun env name args body)))
           (t)))
 
   ;; TODO don't emit if you find main?
