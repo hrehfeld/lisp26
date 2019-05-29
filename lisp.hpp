@@ -678,7 +678,7 @@ Expr append(Expr a, Expr b);
 Expr nreverse(Expr list);
 Expr assoc(Expr item, Expr list);
 
-/* closure 
+/* closure
    functions/macros defined in lisp that save surrounding env
 ****/
 
@@ -690,9 +690,12 @@ Bool is_closure(Expr exp);
 Expr closure_env(Expr closure);
 Expr closure_params(Expr closure);
 Expr closure_body(Expr closure);
+Expr closure_name(Expr closure);
+
+/* function/macro name may be nil for lambda/syntax forms */
 
 Bool is_function(Expr exp);
-Expr make_function(Expr env, Expr params, Expr body, Expr name);  /* name can be nil */
+Expr make_function(Expr env, Expr params, Expr body, Expr name);
 
 void p_function(PrintFun rec, Expr out, Expr exp);
 

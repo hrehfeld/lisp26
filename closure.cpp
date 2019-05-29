@@ -80,6 +80,36 @@ Expr closure_body(Expr closure)
 #endif
 }
 
+Expr closure_name(Expr closure)
+{
+#if LEGACY
+    return nil; // we don't store names!
+#else
+    return caddddr(closure); // TODO use nth
+#endif
+}
+
+static void p_closure(PrintFun rec, Expr out, Expr exp, char const * flavor)
+{
+    stream_put_cstring(out, "#:<lisp ");
+    stream_put_cstring(out, flavor);
+    Expr const name = closure_name(exp);
+    if (name)
+    {
+        stream_put_cstring(out, " ");
+        rec(&g_sys, out, name);
+    }
+    // dump params and body
+    if (0)
+    {
+        stream_put_cstring(out, " ");
+        rec(&g_sys, out, closure_params(exp));
+        stream_put_cstring(out, " -> ");
+        rec(&g_sys, out, closure_body(exp));
+    }
+    stream_put_cstring(out, ">");
+}
+
 /**************/
 
 Bool is_function(Expr exp)
@@ -96,15 +126,7 @@ Expr make_function(Expr env, Expr params, Expr body, Expr name)
 
 void p_function(PrintFun rec, Expr out, Expr exp)
 {
-    stream_put_cstring(out, "#:<lisp function");
-    if (0)
-    {
-        stream_put_cstring(out, " ");
-        rec(&g_sys, out, closure_params(exp));
-        stream_put_cstring(out, " -> ");
-        rec(&g_sys, out, closure_body(exp));
-    }
-    stream_put_cstring(out, ">");
+    p_closure(rec, out, exp, "function");
 }
 
 /**************/
@@ -123,5 +145,5 @@ Expr make_macro(Expr env, Expr params, Expr body, Expr name)
 
 void p_macro(PrintFun rec, Expr out, Expr exp)
 {
-    stream_put_cstring(out, "#:<lisp macro>");
+    p_closure(rec, out, exp, "macro");
 }
