@@ -5,16 +5,29 @@ static Bool closure_inited = 0;
 static Expr function_tag  = nil;
 static Expr macro_tag     = nil;
 
+#define LEGACY 0 // TODO disabling this incurs a ~10% performance hit
+
+// TODO sync closure.lisp, otherwise interop may break
 static Expr make_closure(Expr tag, Expr env, Expr params, Expr body, Expr name)
 {
+#if LEGACY
     return cons(cons(tag, env), cons(params, body));
+#else
+    // TODO profile/reorder/optimize by access pattern?
+    // TODO maybe a vector is a better idea for struct-like types?
+    return list(tag, env, params, body, name);
+#endif
 }
 
 static Bool is_tagged(Expr exp, Expr tag)
 {
+#if LEGACY
     return is_cons(exp) &&
         is_cons(car(exp)) &&
         caar(exp) == tag;
+#else
+    return is_cons(exp) && car(exp) == tag;
+#endif
 }
 
 void closure_init()
@@ -42,17 +55,29 @@ Bool is_closure(Expr exp)
 
 Expr closure_env(Expr closure)
 {
+#if LEGACY
     return cdar(closure);
+#else
+    return cadr(closure); // TODO use nth
+#endif
 }
 
 Expr closure_params(Expr closure)
 {
+#if LEGACY
     return cadr(closure);
+#else
+    return caddr(closure); // TODO use nth
+#endif
 }
 
 Expr closure_body(Expr closure)
 {
+#if LEGACY
     return cddr(closure);
+#else
+    return cadddr(closure); // TODO use nth
+#endif
 }
 
 /**************/
