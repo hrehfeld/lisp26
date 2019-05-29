@@ -1,4 +1,4 @@
-
+;; -*- compile-command: "./lisp load comp.lisp < comp-arith.lisp > comp-arith.cpp" -*-
 (load-file "std.lisp")
 
 (defun put-string (str)
@@ -44,22 +44,6 @@
   ;;(repr name))
   (+ "_fun" (str (meta:expr-data name)))) ; TODO use hash?
 
-(defun env-find (env var)
-  (defun helper (vars vals)
-    (cond ((nil? vars)
-           nil)
-
-          ((eq (car vars) var)
-           vals)
-
-          (t
-           (helper (cdr vars) (cdr vals)))))
-
-  (let ((pair (car env)))
-    (let ((vars (car pair))
-          (vals (cdr pair)))
-      (helper vars vals))))
-
 (defun make-bindings (args)
   (let ((bindings (map (lambda (x) (+ "env_def(tmp, QUOTE(" (str x) "), car(itr)); itr = cdr(itr);")) args)))
     (when bindings
@@ -77,11 +61,15 @@
       (cond ((cons? stmt)
              (let* ((op (car stmt))
                     (args (cdr stmt))
-                    (fun (env-find env op)))
+                    (fun (env-lookup env op)))
+               ; FIXME
+               (println "FUN" op fun)
                (if fun
                    (progn
                      (push (+ "// " (repr stmt)) ret)
-                     (push (+ prefix (mangle op) "(nil, " env-name "); // TODO add args") ret))
+                     (println "test")
+                     (println fun)
+                     (push (+ prefix (defun-mangled-name fun) "(nil, " env-name "); // TODO add args") ret))
 
                  (push (compile-default stmt prefix env-name) ret))))
 
@@ -101,24 +89,32 @@
 
     (nreverse ret)))
 
+(defun make-defun (name mangled-name)
+  (list 'fun name (+ "/* " (symbol-name name) " */ " mangled-name)))
+(defun make-defun-mangled (name c-fix-position) (make-defun name (mangle name)))
+(defun defun-name (f) (caar f))
+(defun defun-mangled-name (f) (caddr f))
+
 (defun compile-defun (env name params body)
-  (env-bind env name name)
-  (let ((bindings (make-bindings params)))
-    (emit-tree `(,(+ "Expr " (mangle name) "(Expr args, Expr env)")
-                 "{"
-                 ("Expr ret = nil;"
-                  "Expr tmp = make_env(env);"
-                  ,@bindings
-                  ,@(render-code body name env)
-                  "return ret;")
-                 "}")))  )
+  (let ((fun (make-defun-mangled name)))
+    (env-bind env name fun)
+    (let ((bindings (make-bindings params)))
+      (emit-tree `(,(+ "Expr " (defun-mangled-name fun) "(Expr args, Expr env)")
+                   "{"
+                   ("Expr ret = nil;"
+                    "Expr tmp = make_env(env);"
+                    ,@bindings
+                    ,@(render-code body name env)
+                    "return ret;")
+                   "}"))))  )
+
+(let ((c-operator-names '("+")))
+  (defun c-operator? (fname) (index c-operator-names fname)))
 
 (defun blah (code env)
-  
-
-  
-
-  
+  (println (make-defun '+ "+"))
+  ;FIXME
+  (env-bind env '+ (make-defun '+ "+" 1))
 
   ;; TODO add a flag to disable this
   (emit-tree '(""
@@ -136,23 +132,24 @@
           (t)))
 
   ;; TODO don't emit if you find main?
+
   (emit-tree `(""
                "int main(int argc, char ** argv)" "{"
                ("try"
-                "{"
-                ("system_init();"
-                 "Expr env = make_env(nil);"
-                 "system_bind_core(env);"
-                 ,@(render-code code nil env)
-                 ;;"_fun269(LIST1(make_string(\"foo\")), env);"
-                 "system_quit();"
-                 "return 0;")
-                "}"
-                "catch (Expr err)"
-                "{"
-                ("fprintf(stderr, \"error: %s\\n\", repr(err));"
-                 "return 1;")
-                "}")
+                 "{"
+                 ("system_init();"
+                  "Expr env = make_env(nil);"
+                  "system_bind_core(env);"
+                  ,@(render-code code nil env)
+                  ;;"_fun269(LIST1(make_string(\"foo\")), env);"
+                  "system_quit();"
+                  "return 0;")
+                 "}"
+                 "catch (Expr err)"
+                 "{"
+                 ("fprintf(stderr, \"error: %s\\n\", repr(err));"
+                  "return 1;")
+                 "}")
                "}")))
 
 (let ((code (read-all-from-stream *read-stream*))
