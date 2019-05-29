@@ -95,9 +95,9 @@
 #define TRACE_STREAM            0 // 0 0 1
 #define TRACE_BACKQUOTE         0 // 0 0 1
 
-#define PROFILE_INTERN          1 // 0 0 1
-#define PROFILE_LOOKUP          1 // 0 0 1
-#define PROFILE_GC              1 // 0 0 1
+#define PROFILE_INTERN          0 // 0 0 1
+#define PROFILE_LOOKUP          0 // 0 0 1
+#define PROFILE_GC              0 // 0 0 1
 
 #define EXIT_ON_ERROR           0 // 0 0 1
 #define PRINT_ON_ERROR          0 // 0 0 1
