@@ -178,6 +178,26 @@ public:
                 }
 #endif
 
+                // TODO add to symbol cache
+                else if (is_op(exp, QUOTE(label)))
+                {
+                    // TODO this is a bit drastic
+                    Expr const name = cadr(exp);
+                    Expr const sub = caddr(exp);
+                    if (is_lambda(sub))
+                    {
+                        return eval_lambda(sub, env, name);
+                    }
+                    else if (is_syntax(sub))
+                    {
+                        return eval_syntax(sub, env, name);
+                    }
+                    else
+                    {
+                        return ERROR("label expressions may only be used with lambda or syntax");
+                    }
+                }
+
                 else if (is_lambda(exp))
                 {
                     Expr const name = nil; // TODO
