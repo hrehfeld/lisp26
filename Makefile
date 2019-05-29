@@ -1,19 +1,19 @@
 CPPFLAGS = -std=c++11 -Wall -Wextra -Wno-implicit-fallthrough -Wno-unused-parameter -Wpedantic
 # if we need to disable some more useless ones from extra
-# -Wno-clobbered  
-# -Wno-cast-function-type  
-# -Wno-deprecated-copy (C++ only) 
-# -Wno-empty-body  
-# -Wno-ignored-qualifiers 
-# -Wno-missing-field-initializers  
-# -Wno-missing-parameter-type (C only)  
-# -Wno-old-style-declaration (C only)  
-# -Wno-override-init  
-# -Wno-sign-compare (C only) 
-# -Wno-redundant-move (only for C++)  
-# -Wno-type-limits  
-# -Wno-uninitialized  
-# -Wno-shift-negative-value (in C++03 and in C99 and newer)  
+# -Wno-clobbered
+# -Wno-cast-function-type
+# -Wno-deprecated-copy (C++ only)
+# -Wno-empty-body
+# -Wno-ignored-qualifiers
+# -Wno-missing-field-initializers
+# -Wno-missing-parameter-type (C only)
+# -Wno-old-style-declaration (C only)
+# -Wno-override-init
+# -Wno-sign-compare (C only)
+# -Wno-redundant-move (only for C++)
+# -Wno-type-limits
+# -Wno-uninitialized
+# -Wno-shift-negative-value (in C++03 and in C99 and newer)
 # -Wno-unused-but-set-parameter (only with -Wunused or -Wall)
 
 BIN = lisp lide
