@@ -6,6 +6,7 @@ static Expr function_tag  = nil;
 static Expr macro_tag     = nil;
 
 #define LEGACY 0 // TODO disabling this incurs a ~10% performance hit
+#define STRUCTURE_REUSE  1
 
 // TODO sync closure.lisp, otherwise interop may break
 // (we could also try to reuse the structure of the existing lambda/syntax/defun/defmacro forms
@@ -21,6 +22,16 @@ static Expr make_closure(Expr tag, Expr env, Expr params, Expr body, Expr name)
     // TODO profile/reorder/optimize by access pattern?
     // TODO maybe a vector is a better idea for struct-like types?
     return cons(cons(tag, env), cons(name, cons(params, body)));
+#endif
+}
+
+static Expr make_closure_from_name_and_stuff(Expr tag, Expr env, Expr name_and_stuff)
+{
+#if LEGACY
+    return ERROR("not implemented");
+#else
+    //println(name_and_stuff);
+    return cons(cons(tag, env), name_and_stuff);
 #endif
 }
 
@@ -134,18 +145,26 @@ Expr make_function(Expr env, Expr params, Expr body, Expr name)
 Expr make_function_from_lambda(Expr env, Expr exp, Expr name)
 {
     DEBUG_ASSERT(closure_inited);
+#if STRUCTURE_REUSE
+    return make_closure_from_name_and_stuff(function_tag, env, cons(name, cdr(exp)));
+#else
     Expr const params = cadr(exp);
     Expr const body   = cddr(exp);
     return make_closure(function_tag, env, params, body, name);
+#endif
 }
 
 Expr make_function_from_defun(Expr env, Expr exp)
 {
     DEBUG_ASSERT(closure_inited);
+#if STRUCTURE_REUSE
+    return make_closure_from_name_and_stuff(function_tag, env, cdr(exp));
+#else
     Expr const name   = cadr(exp);
     Expr const params = caddr(exp);
     Expr const body   = cdddr(exp);
     return make_closure(function_tag, env, params, body, name);
+#endif
 }
 
 void p_function(PrintFun rec, Expr out, Expr exp)
@@ -170,9 +189,13 @@ Expr make_macro(Expr env, Expr params, Expr body, Expr name)
 Expr make_macro_from_syntax(Expr env, Expr exp, Expr name)
 {
     DEBUG_ASSERT(closure_inited);
+#if STRUCTURE_REUSE
+    return make_closure_from_name_and_stuff(macro_tag, env, cons(name, cdr(exp)));
+#else
     Expr const params = cadr(exp);
     Expr const body   = cddr(exp);
     return make_closure(macro_tag, env, params, body, name);
+#endif
 }
 
 void p_macro(PrintFun rec, Expr out, Expr exp)
