@@ -154,11 +154,13 @@ static void print_helper(System * sys, Expr out, Expr exp)
 
     else if (is_builtin_fun(exp))
     {
+        // TODO add names if available
         stream_put_cstring(out, "#:<core function>");
     }
 
     else if (is_builtin_mac(exp))
     {
+        // TODO add names if available
         stream_put_cstring(out, "#:<core macro>");
     }
 
