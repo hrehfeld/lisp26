@@ -10,6 +10,13 @@ static Expr make_closure(Expr tag, Expr env, Expr params, Expr body, Expr name)
     return cons(cons(tag, env), cons(params, body));
 }
 
+static Bool is_tagged(Expr exp, Expr tag)
+{
+    return is_cons(exp) &&
+        is_cons(car(exp)) &&
+        caar(exp) == tag;
+}
+
 void closure_init()
 {
 #if ENABLE_GENSYM

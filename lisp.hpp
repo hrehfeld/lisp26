@@ -882,9 +882,6 @@ Expr f_coerce(Expr exp, Expr type);
  implemented natively for performance reasons, but could be implemented in lisp for bootstrapping
 */
 
-/* tagged conses util */
-Bool is_tagged(Expr exp, Expr tag);
-
 inline static Bool is_op(Expr exp, Expr sym)
 {
     return is_cons(exp) && eq(car(exp), sym);
