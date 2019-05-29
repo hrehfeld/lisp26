@@ -49,31 +49,22 @@
 
 ;; comparison
 
-(def == fixnum:eq) ;; TODO
+(def == equal)
 
-;;(def !=  fixnum:ne) ; TODO get rid of fixnum:ne etc
 (defun != (x y) ; TODO varargs
   (not (== x y)))
 
-;;(def < fixnum:lt)
 (defun < args
   (cond ((fixnum? (car args)) (apply fixnum:lt args))
         ((string? (car args)) (apply string:lt args))
         (t (error "cannot compare" args))))
 
-;;(def > fixnum:gt);
 (defun > (x y)
   (< y x))
 
-;;(def <= fixnum:le)
-;;(defun <= (x y)
-;;  (or (< x y) (== x y)))
 (defun <= (x y)
   (not (> x y)))
 
-;;(def >= fixnum:ge)
-;;(defun >= (x y)
-;;  (<= y x))
 (defun >= (x y)
   (not (< x y)))
 
