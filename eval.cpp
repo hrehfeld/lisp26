@@ -734,9 +734,10 @@ protected:
 
     Expr eval_lambda(Expr exp, Expr env, Expr name)
     {
-        Expr const params = cadr(exp);
-        Expr const body   = cddr(exp);
-        return make_function(env, params, body, name);
+        //Expr const params = cadr(exp);
+        //Expr const body   = cddr(exp);
+        //return make_function(env, params, body, name);
+        return make_function_from_lambda(env, exp, name);
     }
 
 /* syntax *********/
@@ -748,9 +749,10 @@ protected:
 
     Expr eval_syntax(Expr exp, Expr env, Expr name)
     {
-        Expr const params = cadr(exp);
-        Expr const body   = cddr(exp);
-        return make_macro(env, params, body, name);
+        //Expr const params = cadr(exp);
+        //Expr const body   = cddr(exp);
+        //return make_macro(env, params, body, name);
+        return make_macro_from_syntax(env, exp, name);
     }
 
 /* env-* *********/
@@ -1017,10 +1019,7 @@ protected:
 
     Expr eval_defun(Expr exp, Expr env)
     {
-        Expr const name   = cadr(exp);
-        Expr const params = caddr(exp);
-        Expr const body   = cdddr(exp);
-        env_def(env, name, make_function(env, params, body, nil));
+        env_def(env, name, make_function_from_defun(env, exp));
         return nil;
     }
 

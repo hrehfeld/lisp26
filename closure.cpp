@@ -8,6 +8,11 @@ static Expr macro_tag     = nil;
 #define LEGACY 0 // TODO disabling this incurs a ~10% performance hit
 
 // TODO sync closure.lisp, otherwise interop may break
+// (we could also try to reuse the structure of the existing lambda/syntax/defun/defmacro forms
+// (lambda args stmt1 stmt2 stmt3) => (tag name args stmt1 stmt2 stmt3)
+// where everything from args onwards is reused => change API and profile
+// (defun name args stmt1 stmt2) => (tag name args stmt1 stmt2)
+// where everything from name onwards is reused
 static Expr make_closure(Expr tag, Expr env, Expr params, Expr body, Expr name)
 {
 #if LEGACY
@@ -124,6 +129,23 @@ Expr make_function(Expr env, Expr params, Expr body, Expr name)
     return make_closure(function_tag, env, params, body, name);
 }
 
+Expr make_function_from_lambda(Expr env, Expr exp, Expr name)
+{
+    DEBUG_ASSERT(closure_inited);
+    Expr const params = cadr(exp);
+    Expr const body   = cddr(exp);
+    return make_closure(function_tag, env, params, body, name);
+}
+
+Expr make_function_from_defun(Expr env, Expr exp)
+{
+    DEBUG_ASSERT(closure_inited);
+    Expr const name   = cadr(exp);
+    Expr const params = caddr(exp);
+    Expr const body   = cdddr(exp);
+    return make_closure(function_tag, env, params, body, name);
+}
+
 void p_function(PrintFun rec, Expr out, Expr exp)
 {
     p_closure(rec, out, exp, "function");
@@ -140,6 +162,14 @@ Bool is_macro(Expr exp)
 Expr make_macro(Expr env, Expr params, Expr body, Expr name)
 {
     DEBUG_ASSERT(closure_inited);
+    return make_closure(macro_tag, env, params, body, name);
+}
+
+Expr make_macro_from_syntax(Expr env, Expr exp, Expr name)
+{
+    DEBUG_ASSERT(closure_inited);
+    Expr const params = cadr(exp);
+    Expr const body   = cddr(exp);
     return make_closure(macro_tag, env, params, body, name);
 }
 

@@ -696,11 +696,14 @@ Expr closure_name(Expr closure);
 
 Bool is_function(Expr exp);
 Expr make_function(Expr env, Expr params, Expr body, Expr name);
+Expr make_function_from_lambda(Expr env, Expr exp, Expr name);
+Expr make_function_from_defun(Expr env, Expr exp);
 
 void p_function(PrintFun rec, Expr out, Expr exp);
 
 Bool is_macro(Expr exp);
 Expr make_macro(Expr env, Expr params, Expr body, Expr name);
+Expr make_macro_from_syntax(Expr env, Expr exp, Expr name);
 
 void p_macro(PrintFun rec, Expr out, Expr exp);
 
