@@ -245,7 +245,7 @@ Expr fixnum_div(Expr a, Expr b)
     I64 const x = fixnum_value(a);
     I64 const y = fixnum_value(b);
 #if CHECK_DIV0
-    if (!y)
+    if (y == 0)
     {
         return ERROR("division by zero");
     }
