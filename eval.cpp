@@ -6,7 +6,13 @@
 #endif
 
 #if EVAL_STACK_MARKER
-static Expr _eval_stack = nil; // TODO GC
+Expr _eval_stack = nil;
+/* TODO GC
+
+ 1) stuff in the _eval_stack is not added to roots!
+ 2) whatever is reachable only from the eval stack bloats memory (low importance)
+
+ */
 #endif
 
 #if EVAL_STACK_MARKER
