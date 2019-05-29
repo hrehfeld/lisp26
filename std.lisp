@@ -49,7 +49,7 @@
 
 ;; comparison
 
-(def == fixnum:eq) ;; TODO
+(def == equal)
 
 ;;(def !=  fixnum:ne) ; TODO get rid of fixnum:ne etc
 (defun != (x y) ; TODO varargs
