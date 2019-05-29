@@ -398,6 +398,8 @@ inline static Expr cdddr(Expr exp) { return cdr(cdr(cdr(exp))); }
 
 inline static Expr cadddr(Expr exp) { return car(cdr(cdr(cdr(exp)))); }
 
+inline static Expr caddddr(Expr exp) { return car(cdr(cdr(cdr(cdr(exp))))); }
+
 Expr make_cons(Expr a, Expr b);
 
 void set_car(Expr exp, Expr val);
@@ -665,6 +667,7 @@ Expr list(Expr exp1);
 Expr list(Expr exp1, Expr exp2);
 Expr list(Expr exp1, Expr exp2, Expr exp3);
 Expr list(Expr exp1, Expr exp2, Expr exp3, Expr exp4);
+Expr list(Expr exp1, Expr exp2, Expr exp3, Expr exp4, Expr exp5);
 
 U64 list_length(Expr exp);
 
