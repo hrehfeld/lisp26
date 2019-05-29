@@ -388,13 +388,11 @@ public:
         }
         else if (is_builtin_fun(op))
         {
-	        // TODO: support builtin user data 
-            return builtin_apply(op)(vals, env, NULL);
+            return builtin_apply(op)(vals, env, builtin_user(op));
         }
         else if (is_builtin_mac(op))
         {
-	        // TODO: support builtin user data 
-            return builtin_apply(op)(vals, env, NULL);
+            return builtin_apply(op)(vals, env, builtin_user(op));
         }
         else
         {
