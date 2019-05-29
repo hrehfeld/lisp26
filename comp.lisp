@@ -5,6 +5,7 @@
 (defun put-string (str)
   (stream-put-string *print-stream* str))
 
+;; TODO useful for other code generators? -> move to a library
 (defun line-tree-to-stream (tree out indent)
   (defun emit (str)
     (stream-put-string out str))
