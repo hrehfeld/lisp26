@@ -137,7 +137,7 @@ static void cb_maybe_realloc(ConsBuffer * cb)
         return;
     }
 
-    if (MAX_CONSES == -1 || cb->max * 2 <= MAX_CONSES)
+    if (MAX_CONSES == -1 || cb->max * 2 <= (U64) MAX_CONSES)
     {
         if (cb->max == 0)
         {
