@@ -323,10 +323,17 @@
 
 (load-file "std/seq.lisp")
 
+(defun cons:index (seq sub)
+  (if (== (car seq) sub)
+      t
+    (let ((tail (cdr seq)))
+      (when tail (cons:index tail sub)))))
+
 (defun index (seq sub)
   (cond ((string? seq)
          (string:index seq sub))
-
+        ((cons? seq)
+         (cons:index seq sub))
         (t
          (error))))
 
