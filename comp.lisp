@@ -92,7 +92,7 @@
     (nreverse ret)))
 
 (defun make-defun (name mangled-name)
-  (list 'fun name (+ "/* " (symbol-name name) " */ " mangled-name)))
+  (list 'fun name mangled-name))
 (defun make-defun-mangled (name c-fix-position) (make-defun name (mangle name)))
 (defun defun-name (f) (caar f))
 (defun defun-mangled-name (f) (caddr f))
