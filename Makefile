@@ -39,9 +39,11 @@ extra: hello blah comp blub.py render.cpp build.py
 tests: lisp std.lisp std.test
 	./lisp test
 	./lisp test core.test
+	./lisp test env.test
 	./lisp test std.lisp std.test
 	./lisp test meta.lisp meta.test
 	./lisp test hash.lisp hash.test
+	./lisp test env.lisp env.test
 
 default-config:
 	python3 fuzz.py default
