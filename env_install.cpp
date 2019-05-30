@@ -120,13 +120,11 @@ static Expr fun_env_lookup(Expr args, Expr env, void * user)
 
     if (nargs == 1)
     {
-        env_lookup(env, arg1);
-        return nil;
+        return env_lookup(env, arg1);
     }
     else if (nargs == 2)
     {
-        env_lookup(arg1, arg2);
-        return nil;
+        return env_lookup(arg1, arg2);
     }
     else
     {

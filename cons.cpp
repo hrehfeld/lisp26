@@ -29,11 +29,23 @@ Expr cons(Expr a, Expr b)
 
 Expr car(Expr exp)
 {
+#if CXR_NIL_IS_NIL
+    if (!exp)
+    {
+        return exp;
+    }
+#endif
     return *cb_car(&g_sys.cons, exp);
 }
 
 Expr cdr(Expr exp)
 {
+#if CXR_NIL_IS_NIL
+    if (!exp)
+    {
+        return exp;
+    }
+#endif
     return *cb_cdr(&g_sys.cons, exp);
 }
 
