@@ -1,3 +1,4 @@
+;; -*- compile-command: "./lisp load lisp2cpp.lisp comp-arith.lisp > comp-arith.cpp" -*-
 
 (load-file "lisp2x.lisp")
 
