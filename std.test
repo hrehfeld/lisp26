@@ -167,6 +167,14 @@ c")
 
 ((join "foo" '()) => "")
 
+
+;;; cons:join
+
+((cons:join " " '("a" "b" "c")) => ("a" " " "b" " " "c"))
+((cons:join 'r '("a" "b" "c")) => ("a" 'r "b" 'r "c"))
+
+((cons:join "foo" '()) => ())
+
 ;;; random "complex" tests
 
 ((join ", " (map str (range 4))) => "0, 1, 2, 3")

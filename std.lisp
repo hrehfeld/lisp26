@@ -203,6 +203,11 @@
       (= ret (string-add ret elt)))
     ret))
 
+(defun cons:join (sep seq)
+  (let ((head (car seq)))
+    (when (head)
+      (cons head (cons sep (cons:join sep (cdr seq)))))))
+
 (defmacro error args
   `(throw nil (list '#:error ,@args)))
 
