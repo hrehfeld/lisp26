@@ -3,7 +3,7 @@
 
 #if ENABLE_GENSYM
 
-void gensym_init(Gensym * gensym)
+void gensym_init(GensymState * gensym)
 {
     gensym->counter = 0;
 }
@@ -17,7 +17,7 @@ Bool is_gensym(Expr exp)
     return expr_type(exp) == TYPE_GENSYM;
 }
 
-Expr make_gensym(Gensym * gensym)
+Expr make_gensym(GensymState * gensym)
 {
     return make_expr(TYPE_GENSYM, gensym->counter++);
 }

@@ -412,17 +412,16 @@ Expr f_cdr(Expr exp);
 
 #if ENABLE_GENSYM
 
-//TODO: rename GensymState
-struct Gensym
+struct GensymState
 {
     U64 counter;
 };
 
-void gensym_init(Gensym * gensym);
+void gensym_init(GensymState * gensym);
 void gensym_quit();
 
 Bool is_gensym(Expr exp);
-Expr make_gensym(Gensym * gensym);
+Expr make_gensym(GensymState * gensym);
 
 void p_gensym(PrintFun rec, Expr out, Expr exp);
 
@@ -1014,7 +1013,7 @@ private:
     F64 t0;
 };
 
-/* meta 
+/* meta
    bind interpreter internals
 
 *******/
@@ -1031,7 +1030,7 @@ struct System
     Symbol symbol;
     ConsBuffer cons;
 #if ENABLE_GENSYM
-    Gensym gensym;
+    GensymState gensym;
 #endif
 };
 
