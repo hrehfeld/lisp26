@@ -16,14 +16,30 @@ CXXFLAGS = -std=c++11 -Wall -Wextra -Wno-implicit-fallthrough -Wno-unused-parame
 # -Wno-shift-negative-value (in C++03 and in C99 and newer)
 # -Wno-unused-but-set-parameter (only with -Wunused or -Wall)
 
+LDLIBS = -lSDL2
+
+COMPILED_POSTFIX = .compiled
 BIN = lisp lide
 MOD = bignum builtin builtin_misc closure coerce cons cons_bind cons_impl core env env_install env_test error eval expr fixnum float gensym hash hash_bind hash_impl list meta number pointer printer reader reader_bind reader_test sdl2 spooky stream stream_impl string symbol system test time util vector
 OBJ = $(MOD:%=%.o)
 CPP = $(MOD:%=%.cpp)
+COMPILED = hello comp blah comp-arith
 
 RUNTIME = runtime.hpp lisp.hpp config.hpp font.hpp
 
-all: $(BIN)
+RUNTIME_REQUIRED = lide hello blah comp
+
+LINK.o = $(LINK.cc)
+
+all: CXXFLAGS += -O2
+all: executable
+
+executable: $(BIN)
+
+debug: CXXFLAGS += -g
+debug: executable
+
+
 
 clean:
 	rm -rf $(BIN) $(OBJ)
@@ -34,7 +50,7 @@ e: extra
 d: default-config
 r: random-config
 
-extra: hello blah comp blub.py render.cpp build.py
+extra: $(COMPILED) blub.py render.cpp build.py 
 
 tests: lisp std.lisp std.test
 	./lisp test
@@ -51,37 +67,25 @@ default-config:
 random-config:
 	python3 fuzz.py random
 
+lisp: $(OBJ)
+
 %.o: %.cpp lisp.hpp config.hpp
 
 stream.o: stream.cpp lisp.hpp config.hpp stream_impl.hpp
-	$(CXX) -c -O2 $< -o $@
 
 stream_impl.o: stream_impl.cpp lisp.hpp config.hpp stream_impl.hpp
-	$(CXX) -c -O2 $< -o $@
 
-lisp: $(OBJ) lisp.o
-	$(CXX) -Wall -O2 $^ -lSDL2 -o $@
+$(RUNTIME_REQUIRED): $(RUNTIME)
 
-lide: lide.cpp $(RUNTIME)
-	$(CXX) -O2 $< -lSDL2 -o $@
+# $(COMPILED): $(COMPILED:%=%$(COMPILED_POSTFIX).cpp)
 
-hello.cpp: hello.lisp comp.lisp std.lisp lisp
+comp: comp$(COMPILED_POSTFIX).cpp
+hello: hello$(COMPILED_POSTFIX).cpp
+blah: blah$(COMPILED_POSTFIX).cpp
+comp-arith: comp-arith$(COMPILED_POSTFIX).cpp
+
+%$(COMPILED_POSTFIX).cpp: %.lisp comp.lisp std.lisp lisp 
 	./lisp load comp.lisp < $< > $@
-
-hello: hello.cpp $(RUNTIME)
-	$(CXX) -O2 $< -lSDL2 -o $@
-
-comp.cpp: comp.lisp std.lisp lisp
-	./lisp load comp.lisp < $< > $@
-
-comp: comp.cpp $(RUNTIME)
-	$(CXX) -O2 $< -lSDL2 -o $@
-
-blah.cpp: blah.lisp comp.lisp std.lisp lisp
-	./lisp load comp.lisp < $< > $@
-
-blah: blah.cpp $(RUNTIME)
-	$(CXX) -O2 $< -lSDL2 -o $@
 
 %.py: %.lisp lisp2py.lisp lisp2x.lisp std.lisp lisp
 	./lisp load lisp2py.lisp --no-comments $< > $@
