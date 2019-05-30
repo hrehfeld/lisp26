@@ -55,6 +55,15 @@
 (defun compile-default (stmt prefix env-name)
     (+ prefix "eval_string(" (escape (repr stmt)) ", " env-name ");"))
 
+(defun render-expr (expr ctx env)
+  (cond ((fixnum? expr)
+         (println "fixnum" expr)
+         (let ((r (coerce expr 'string)))
+           (println expr)
+           r))
+        (t (error "not implemented")))
+  )
+
 (defun render-code (code ctx env)
   (let ((ret '())
         (env-name (if ctx "tmp" "env"))
@@ -64,16 +73,24 @@
              (let* ((op (car stmt))
                     (args (cdr stmt))
                     (fun (env-lookup env op)))
-               ; FIXME
-               (println "FUN" op fun)
-               (if fun
-                   (progn
-                     (push (+ "// " (repr stmt)) ret)
-                     (println "test")
-                     (println fun)
-                     (push (+ prefix (defun-mangled-name fun) "(nil, " env-name "); // TODO add args") ret))
+               (println args)
+               (let ((args (map (lambda (e) (render-expr e ctx env))
+                                args)))
+                 (println "after" args)
+                 (if fun
+                     (progn
+                       (push (+ "// " (repr stmt)) ret)
+                       (println "test")
+                       (println fun)
+                       (push (+ prefix
+                                (let ((fname (defun-mangled-name fun)))
+                                  (if (c-operator? fname)
+                                      (+ (join (+ " " fname " ") args) " //operator")
+                                    (+ fname "(nil, " env-name "); // TODO add args"))))
+                             ret))
 
-                 (push (compile-default stmt prefix env-name) ret))))
+                   (push (compile-default stmt prefix env-name) ret))))
+             )
 
             ;;((cons? stmt)
             ;; (let ((op (car stmt)))
