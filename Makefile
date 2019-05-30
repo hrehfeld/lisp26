@@ -1,4 +1,4 @@
-CPPFLAGS = -std=c++11 -Wall -Wextra -Wno-implicit-fallthrough -Wno-unused-parameter -Wpedantic
+CXXFLAGS = -std=c++11 -Wall -Wextra -Wno-implicit-fallthrough -Wno-unused-parameter -Wpedantic
 # if we need to disable some more useless ones from extra
 # -Wno-clobbered
 # -Wno-cast-function-type
@@ -52,37 +52,37 @@ random-config:
 	python3 fuzz.py random
 
 %.o: %.cpp lisp.hpp config.hpp
-	g++ -c $(CPPFLAGS) -O2 $< -o $@
+	$(CXX) -c -O2 $< -o $@
 
 stream.o: stream.cpp lisp.hpp config.hpp stream_impl.hpp
-	g++ -c $(CPPFLAGS) -O2 $< -o $@
+	$(CXX) -c -O2 $< -o $@
 
 stream_impl.o: stream_impl.cpp lisp.hpp config.hpp stream_impl.hpp
-	g++ -c $(CPPFLAGS) -O2 $< -o $@
+	$(CXX) -c -O2 $< -o $@
 
 lisp: $(OBJ) lisp.o
-	g++ -Wall -O2 $^ -lSDL2 -o $@
+	$(CXX) -Wall -O2 $^ -lSDL2 -o $@
 
 lide: lide.cpp $(RUNTIME)
-	g++ $(CPPFLAGS) -O2 $< -lSDL2 -o $@
+	$(CXX) -O2 $< -lSDL2 -o $@
 
 hello.cpp: hello.lisp comp.lisp std.lisp lisp
 	./lisp load comp.lisp < $< > $@
 
 hello: hello.cpp $(RUNTIME)
-	g++ $(CPPFLAGS) -O2 $< -lSDL2 -o $@
+	$(CXX) -O2 $< -lSDL2 -o $@
 
 comp.cpp: comp.lisp std.lisp lisp
 	./lisp load comp.lisp < $< > $@
 
 comp: comp.cpp $(RUNTIME)
-	g++ $(CPPFLAGS) -O2 $< -lSDL2 -o $@
+	$(CXX) -O2 $< -lSDL2 -o $@
 
 blah.cpp: blah.lisp comp.lisp std.lisp lisp
 	./lisp load comp.lisp < $< > $@
 
 blah: blah.cpp $(RUNTIME)
-	g++ $(CPPFLAGS) -O2 $< -lSDL2 -o $@
+	$(CXX) -O2 $< -lSDL2 -o $@
 
 %.py: %.lisp lisp2py.lisp lisp2x.lisp std.lisp lisp
 	./lisp load lisp2py.lisp --no-comments $< > $@
