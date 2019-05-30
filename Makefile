@@ -52,7 +52,6 @@ random-config:
 	python3 fuzz.py random
 
 %.o: %.cpp lisp.hpp config.hpp
-	$(CXX) -c -O2 $< -o $@
 
 stream.o: stream.cpp lisp.hpp config.hpp stream_impl.hpp
 	$(CXX) -c -O2 $< -o $@
