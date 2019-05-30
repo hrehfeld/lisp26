@@ -4,6 +4,7 @@
 #endif
 
 #define NIL_IS_MACRO            1 // 1 0 1
+#define CXR_NIL_IS_NIL          1 // 1 0 1
 
 #define MAX_SYMBOLS            -1
 #define MAX_CONSES             -1
