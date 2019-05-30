@@ -180,6 +180,9 @@ public:
 
                 else if (is_op(exp, SYM_label))
                 {
+#if BYPASS_LABEL
+                    return eval(caddr(exp), env);
+#else
                     // TODO this is a bit drastic
                     Expr const name = cadr(exp);
                     Expr const sub = caddr(exp);
@@ -195,18 +198,17 @@ public:
                     {
                         return ERROR("label expressions may only be used with lambda or syntax");
                     }
+#endif
                 }
 
                 else if (is_lambda(exp))
                 {
-                    Expr const name = nil; // TODO
-                    return eval_lambda(exp, env, name);
+                    return eval_lambda(exp, env, nil);
                 }
 
                 else if (is_syntax(exp))
                 {
-                    Expr const name = nil; // TODO
-                    return eval_syntax(exp, env, name);
+                    return eval_syntax(exp, env, nil);
                 }
 
 #if EVAL_ENV
@@ -733,9 +735,6 @@ protected:
 
     Expr eval_lambda(Expr exp, Expr env, Expr name)
     {
-        //Expr const params = cadr(exp);
-        //Expr const body   = cddr(exp);
-        //return make_function(env, params, body, name);
         return make_function_from_lambda(env, exp, name);
     }
 
@@ -748,9 +747,6 @@ protected:
 
     Expr eval_syntax(Expr exp, Expr env, Expr name)
     {
-        //Expr const params = cadr(exp);
-        //Expr const body   = cddr(exp);
-        //return make_macro(env, params, body, name);
         return make_macro_from_syntax(env, exp, name);
     }
 
