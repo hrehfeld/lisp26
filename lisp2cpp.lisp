@@ -18,8 +18,7 @@
           (push "" ret))) ;; TODO filter defmacro calls before calling this (multi-pass architecture)
       (when +show-comment+
         (push (+ "// " (repr exp)) ret))
-      (dolist (line (render-stmt exp env nil))
-        (push line ret)))
+      (= ret (append (nreverse (render-stmt exp env nil)) ret)))
 
     (nreverse ret)))
 
