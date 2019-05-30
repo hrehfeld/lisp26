@@ -111,7 +111,9 @@
                    "}"))))  )
 
 (let ((c-operator-names '("+")))
-  (defun c-operator? (fname) (index c-operator-names fname)))
+  (defun-global c-operator? (fname)
+    (println c-operator-names fname)
+    (index c-operator-names fname)))
 
 (defun blah (code env)
   (println (make-defun '+ "+"))
