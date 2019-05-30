@@ -48,14 +48,21 @@
       (= ret (append ret (render-stmt stmt env exp)))) ;; TODO this is hopelessly slow
     ret))
 
+(defun declare-type-parse (type-map (type . names))
+  (dolist (name names)
+    (env-bind type-map name type)))
+
 (defun strip-declarations (body type-map)
   (when body
-      (if (declare? (car body))
-          (let (((_ type . names) (car body)))
-            (dolist (name names)
-              (env-bind type-map name type))
-            (strip-declarations (cdr body) type-map))
-          body)))
+    (if (declare? (car body))
+        ;; TODO: support more declares
+        (let (((_decl-sym . decls) (car body)))
+          (dolist ((decl-kind . decl-args) decls)
+            (cond ((== decl-kind 'type)
+                   (declare-type-parse type-map decl-args))
+                  (t (error "unsupported declare kind"))))
+          (strip-declarations (cdr body) type-map))
+      body)))
 
 (defun render-defun (exp env ctx)
   ;;(println '// 'DEFUN)
