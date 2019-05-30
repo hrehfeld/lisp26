@@ -416,7 +416,7 @@ static inline Expr do_parse_expr(Expr in, Expr tok)
                 while (1)
                 {
                     char const ch = peek(in);
-                    if (ch < '0' || ch > '9')
+                    if (!is_number_part(ch))
                     {
                         break;
                     }
