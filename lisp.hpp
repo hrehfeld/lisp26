@@ -327,21 +327,20 @@ inline static Bool eq(Expr a, Expr b)
 #define SYM_equal            QUOTE(equal)
 #define SYM_gensym           QUOTE(gensym)
 
-//TODO rename to SymbolState
-struct Symbol
+typedef struct
 {
     U64 num;
     U64 max;
-	//TODO: rename to read write
+    // TODO: rename to read write
     char ** names_r;
     char ** names_w;
 #if SYMBOL_CACHE
     U64 ncached;
 #endif
-};
+} SymbolState;
 
-void symbol_init(Symbol * symbol);
-void symbol_quit(Symbol * symbol);
+void symbol_init(SymbolState * symbol);
+void symbol_quit(SymbolState * symbol);
 void symbol_gc(U64 num_roots, Expr ** roots);
 
 //TODO: inline
@@ -1027,7 +1026,7 @@ global state
 
 struct System
 {
-    Symbol symbol;
+    SymbolState symbol;
     ConsBuffer cons;
 #if ENABLE_GENSYM
     GensymState gensym;

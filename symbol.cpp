@@ -10,7 +10,7 @@ F64 _intern_time = 0.0;
 U64 _intern_call = 0;
 #endif
 
-static void do_realloc(Symbol * symbol)
+static void do_realloc(SymbolState * symbol)
 {
     symbol->names_w = (char **) realloc(symbol->names_w, sizeof(char *) * symbol->max);
     if (!symbol->names_w)
@@ -20,7 +20,7 @@ static void do_realloc(Symbol * symbol)
     symbol->names_r = symbol->names_w;
 }
 
-static void maybe_realloc(Symbol * symbol)
+static void maybe_realloc(SymbolState * symbol)
 {
     if (symbol->num < symbol->max)
     {
@@ -46,7 +46,7 @@ static void maybe_realloc(Symbol * symbol)
 
 #if SYMBOL_CACHE
 
-static void intern_cached(Symbol * symbol, char const * name, Expr exp)
+static void intern_cached(SymbolState * symbol, char const * name, Expr exp)
 {
     Expr const sym = intern(name);
     if (sym != exp)
@@ -59,7 +59,7 @@ static void intern_cached(Symbol * symbol, char const * name, Expr exp)
 
 static Bool _symbol_complain = 0;
 
-void cache_symbols(Symbol * symbol)
+void cache_symbols(SymbolState * symbol)
 {
     // can only cache at beginning of buffer
     ASSERT(symbol->num == 0);
@@ -107,9 +107,9 @@ void cache_symbols(Symbol * symbol)
 
 #endif
 
-void symbol_init(Symbol * symbol)
+void symbol_init(SymbolState * symbol)
 {
-    memset(symbol, 0, sizeof(Symbol));
+    memset(symbol, 0, sizeof(SymbolState));
 
     maybe_realloc(symbol);
 
@@ -120,7 +120,7 @@ void symbol_init(Symbol * symbol)
 #endif
 }
 
-void symbol_quit(Symbol * symbol)
+void symbol_quit(SymbolState * symbol)
 {
     symbol->names_r = NULL;
     free(symbol->names_w);
@@ -188,7 +188,7 @@ static void walk(Expr * pexp, HashSetU64 * visited)
     }
 }
 
-void symbol_gc(Symbol * symbol, U64 num_roots, Expr ** roots)
+void symbol_gc(SymbolState * symbol, U64 num_roots, Expr ** roots)
 {
     return;
 
@@ -242,7 +242,7 @@ Bool is_symbol(Expr exp)
     return exp == nil || expr_type(exp) == TYPE_SYMBOL;
 }
 
-static Expr _make_symbol(Symbol * symbol, char const * name, size_t len)
+static Expr _make_symbol(SymbolState * symbol, char const * name, size_t len)
 {
 #if PROFILE_INTERN
     Profiler prof(&_intern_time, &_intern_call);
