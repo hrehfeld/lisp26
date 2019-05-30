@@ -14,8 +14,8 @@
     (dolist (exp exps)
       (if 1st
           (= 1st nil)
-          (unless (equal "" (car ret))
-            (push "" ret))) ;; TODO filter defmacro calls before calling this (multi-pass architecture)
+        (unless (equal "" (car ret))
+          (push "" ret))) ;; TODO filter defmacro calls before calling this (multi-pass architecture)
       (when +show-comment+
         (push (+ "// " (repr exp)) ret))
       (dolist (line (render-stmt exp env nil))
