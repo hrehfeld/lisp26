@@ -274,6 +274,7 @@ inline static Bool eq(Expr a, Expr b)
 #define SYM_unwind_protect   SYM_CONST(0x1f)
 #define SYM_while            SYM_CONST(0x20)
 #define SYM_macroexpand_1    SYM_CONST(0x21)
+#define SYM_label            SYM_CONST(0x22)
 
 #else
 
@@ -313,6 +314,7 @@ inline static Bool eq(Expr a, Expr b)
 #define SYM_unwind_protect   QUOTE(unwind-protect)
 #define SYM_while            QUOTE(while)
 #define SYM_macroexpand_1    QUOTE(macroexpand-1)
+#define SYM_label            QUOTE(label)
 
 #endif
 

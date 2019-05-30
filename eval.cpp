@@ -178,8 +178,7 @@ public:
                 }
 #endif
 
-                // TODO add to symbol cache
-                else if (is_op(exp, QUOTE(label)))
+                else if (is_op(exp, SYM_label))
                 {
                     // TODO this is a bit drastic
                     Expr const name = cadr(exp);

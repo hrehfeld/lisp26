@@ -102,6 +102,7 @@ void cache_symbols(SymbolState * symbol)
     intern_cached(symbol, "unwind-protect"  , SYM_unwind_protect);
     intern_cached(symbol, "while"           , SYM_while);
     intern_cached(symbol, "macroexpand-1"   , SYM_macroexpand_1);
+    intern_cached(symbol, "label"           , SYM_label);
     _symbol_complain = 1;
 }
 
