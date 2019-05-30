@@ -49,7 +49,7 @@
     ret))
 
 (defun strip-declarations (body type-map)
-  (if body
+  (when body
       (if (declare? (car body))
           (let (((_ type . names) (car body)))
             (dolist (name names)
