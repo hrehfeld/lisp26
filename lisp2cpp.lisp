@@ -144,14 +144,14 @@
 
        ((any-named-op? exp
                        '+= '^= '>> '<<
-                       + '- '* '/ '< '>)
-        (let ((pl "")
-              (pr ""))
-          (when (< (prec exp) (prec ctx))
-            (= pl "(")
-            (= pr ")"))
-          (+ pl (join (+ " " (render-expr (car exp) env exp) " ") (map (lambda (x) (render-expr x env exp)) (cdr exp))) pr)))
-
+                       '+ '- '* '/ '< '>)
+        (let* ((use-parens (< (prec exp) (prec ctx)))
+               (pl (if use-parens "(" ""))
+               (pr (if use-parens ")" "")))
+          (+ pl (join
+                 (+ " " (render-expr (car exp) env exp) " ")
+                 (map (lambda (x) (render-expr x env exp)) (cdr exp)))
+             pr)))
        (t
         (render-call exp env ctx))))
 
