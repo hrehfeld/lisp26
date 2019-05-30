@@ -203,10 +203,17 @@
       (= ret (string-add ret elt)))
     ret))
 
+(defun cons:join:no-empty-check (sep seq)
+  (let ((head (car seq))
+        (tail (cdr seq)))
+    (if (eq tail nil)
+        (cons head nil)
+      (cons head
+            (cons sep
+                  (cons:join sep (cdr seq)))))))
+
 (defun cons:join (sep seq)
-  (let ((head (car seq)))
-    (when (head)
-      (cons head (cons sep (cons:join sep (cdr seq)))))))
+  (when seq (cons:join:no-empty-check sep seq)))
 
 (defmacro error args
   `(throw nil (list '#:error ,@args)))
