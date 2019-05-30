@@ -154,6 +154,7 @@ static Expr env_find_global(Expr env, Expr var)
 
 Expr make_env(Expr outer)
 {
+    //rformat("MAKE-ENV {}\n", outer);
     return cons(cons(nil, nil), outer);
 }
 
@@ -265,7 +266,17 @@ Expr env_lookup(Expr env, Expr var)
 #endif
 
     Expr const iter = env_find_global(env, var);
-    return iter ? car(iter) : ERROR("unbound variable %s", repr(var));
+
+    //if (var == QUOTE(foo))
+    //{
+    //    rformat("ENV-LOOKUP {} {} => {}\n", env, var, iter);
+    //}
+
+    if (iter)
+    {
+        return car(iter);
+    }
+    return ERROR("unbound variable %s", repr(var));
 }
 
 Bool env_maybe_lookup(Expr env, Expr var, Expr * val)
