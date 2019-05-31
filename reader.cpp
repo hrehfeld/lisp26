@@ -393,41 +393,26 @@ static inline Expr do_parse_expr(Expr in, Expr tok)
 #if READER_USE_NUMBER
             Expr val = make_number(0);
             Expr ten = make_number(10);
+
+            while (1)
+            {
+	            char const ch = peek(in);
+	            if (!is_number_part(ch))
+	            {
+		            break;
+	            }
+
+	            I64 const digit = ch - '0';
+
+	            val = number_mul(val, ten);
+	            val = number_add(val, make_number(digit));
+
+	            write(tok, consume(in));
+            }
+            
             if (neg)
             {
-                while (1)
-                {
-                    char const ch = peek(in);
-                    if (!is_number_part(ch))
-                    {
-                        break;
-                    }
-
-                    I64 const digit = ch - '0';
-
-                    val = number_mul(val, ten);
-                    val = number_sub(val, make_number(digit));
-
-                    write(tok, consume(in));
-                }
-            }
-            else
-            {
-                while (1)
-                {
-                    char const ch = peek(in);
-                    if (!is_number_part(ch))
-                    {
-                        break;
-                    }
-
-                    I64 const digit = ch - '0';
-
-                    val = number_mul(val, ten);
-                    val = number_add(val, make_number(digit));
-
-                    write(tok, consume(in));
-                }
+	            val = number_neg(val);
             }
 
             if (!is_number_stop(peek(in)))
