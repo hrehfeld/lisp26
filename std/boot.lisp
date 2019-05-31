@@ -20,9 +20,9 @@
 
 ;; add a label to definitions
 (def defmacro
-    (syntax (name args . body)
-            `(def ,name
-                  (label ,name (syntax ,args ,@body)))))
+    (label 'defmacro (syntax (name args . body)
+                       `(def ,name
+                            (label ,name (syntax ,args ,@body))))))
 
 ;; TODO analyze defun body for returns and maybe skip block
 
