@@ -26,7 +26,7 @@ ifeq ($(DEBUG), 1)
 CXXFLAGS += -g
 #CXXFLAGS += -rdynamic # TODO doesn't work with apple clang "g++"
 CXXFLAGS += -O0
-LDFLAGS += O0
+LDFLAGS += -O0
 else
 CXXFLAGS += -O2
 LDFLAGS += -O2
