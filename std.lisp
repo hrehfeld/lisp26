@@ -193,6 +193,9 @@
 (defun reverse (seq)
   (nreverse (seq:copy seq)))
 
+(defmacro doseq args
+  `(dolist ,@args))
+
 (defun join (sep seq)
   (let ((ret "")
         (1st 't))
