@@ -1,8 +1,8 @@
 /lisp
 /lide
-/hello
-/blah
-/comp
+tests/programs/hello
+tests/programs/blah
+tests/programs/comp
 *.o
 .DS_Store
 __pycache__
