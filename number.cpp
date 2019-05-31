@@ -47,6 +47,25 @@ static Expr _normalize(Expr num)
 
 #endif
 
+Expr number_neg(Expr a)
+{
+#if ENABLE_FIXNUM
+    if (is_fixnum(a))
+    {
+	    //TODO: convert smallest/largest fixnum to bignum
+	    return fixnum_neg(a);
+    }
+#endif
+
+#if ENABLE_BIGNUM
+    if (is_bignum(a)) {
+	    return _normalize(bignum_neg(a));
+    }
+#endif
+    return ERROR("cannot neg %s", repr(a));
+}
+
+
 Expr number_add(Expr a, Expr b)
 {
 #if ENABLE_BIGNUM
