@@ -63,3 +63,16 @@
 ;;  (list:len seq))
 ;;
 ;;(defmethod len ((nil seq)) 0)
+
+
+
+;; todo maybe rename
+(defun binary-classify (pred seq)
+  (let ((a '())
+        (b '()))
+    (dolist (elt seq)
+                                        ;(println elt (pred elt) a b)
+      (if (pred elt)
+          (push elt a)
+        (push elt b)))
+    (cons (nreverse a) (nreverse b))))

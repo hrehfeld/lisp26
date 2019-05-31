@@ -283,3 +283,11 @@ b" "\n") => ("a" "b"))
 ;;     (= n (+ n 2)))
 ;;   n)
 ;; => 20)
+
+
+;; seq.lisp
+
+((binary-classify
+  (lambda (e) (equal e 4))
+  '(1 1 4 4))
+ => ((4 4) . (1 1)))
