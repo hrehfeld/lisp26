@@ -393,31 +393,62 @@ static inline Expr do_parse_expr(Expr in, Expr tok)
 #if READER_USE_NUMBER
             Expr val = make_number(0);
             Expr ten = make_number(10);
+            Expr one = make_number(1);
+            Expr den = one;
 
+            // TODO extract function: parse_int
             while (1)
             {
-	            char const ch = peek(in);
-	            if (!is_number_part(ch))
-	            {
-		            break;
-	            }
+                char const ch = peek(in);
+                if (!is_number_part(ch))
+                {
+                    break;
+                }
 
-	            I64 const digit = ch - '0';
+                I64 const digit = ch - '0';
 
-	            val = number_mul(val, ten);
-	            val = number_add(val, make_number(digit));
+                val = number_mul(val, ten);
+                val = number_add(val, make_number(digit));
 
-	            write(tok, consume(in));
+                write(tok, consume(in));
             }
-            
+
+
+            if (peek(in) == '.')
+            {
+                write(tok, consume(in));
+
+                while (1)
+                {
+                    char const ch = peek(in);
+                    if (!is_number_part(ch))
+                    {
+                        break;
+                    }
+
+                    I64 const digit = ch - '0';
+
+                    val = number_mul(val, ten);
+                    val = number_add(val, make_number(digit));
+                    den = number_mul(den, ten);
+
+                    write(tok, consume(in));
+                }
+            }
+
             if (neg)
             {
-	            val = number_neg(val);
+                val = number_neg(val);
             }
 
             if (!is_number_stop(peek(in)))
             {
                 goto symbol_loop;
+            }
+
+            if (!number_equal(den, one))
+            {
+                val = number_div(val, den);
             }
 
             return val;
