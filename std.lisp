@@ -415,3 +415,8 @@
 ;; ;)
 (defmacro printf (fmt . args)
   `(format t ,fmt ,@args))
+
+
+;;functions
+(defun curry-2nd (f arg)
+  (lambda args (apply f `(,@args ,arg))))

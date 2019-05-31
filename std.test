@@ -284,6 +284,10 @@ b" "\n") => ("a" "b"))
 ;;   n)
 ;; => 20)
 
+;;functions
+( ((curry-2nd + "foo") "bar")
+=> "barfoo")
+
 
 ;; seq.lisp
 
