@@ -1,27 +1,89 @@
-;; -*- compile-command: "./lisp load lisp2cpp.lisp comp-arith.lisp > comp-arith.cpp" -*-
+;; -*- compile-command: "./lisp load lisp2cpp.lisp tests/programs/comp-arith.lisp > comp-arith.lisp" -*-
 
 (load-file "lisp2x.lisp")
 
 (defconstant +show-comment+ nil)
 
+(defconstant $DEFMAIN '$defmain)
+
+(defun split-file (exps)
+  (binary-classify defun? exps))
+
+(defun compile-expr (exp env)
+  (let ((r '())))
+  (cond
+   ((symbol? exp)
+    ;;TODO: check if exists
+    (render-name exp))
+
+    ((fixnum? exp)
+     (str exp))
+
+    ((cons? exp)
+     (cond
+       ((coerce? exp)
+        (render-coerce exp env ctx))
+
+       ((if? exp)
+        (+ (render-expr (cadr exp) env exp)
+           " ? "
+           (render-expr (caddr exp) env exp)
+           " : "
+           (render-expr (cadddr exp) env exp)))
+
+       ((any-named-op? exp
+                       '+= '^= '>> '<<
+                       '+ '- '* '/ '< '>)
+        (let* ((use-parens (< (prec exp) (prec ctx)))
+               (pl (if use-parens "(" ""))
+               (pr (if use-parens ")" "")))
+          (+ pl (join
+                 (+ " " (render-expr (car exp) env exp) " ")
+                 (map (lambda (x) (render-expr x env exp)) (cdr exp)))
+             pr)))
+       (t
+        (render-call exp env ctx))))
+
+    (t
+     (error "cannot compile expr " exp)))
+  )
+
+(defun compile-assign-env (exp env)
+  (cond ((any-named-op? exp 'let* 'let)
+         (let (((let-sym let-decls . let-body) exp))
+           (list let-sym (make-env env) let-decls (map (curry-2nd compile-assign-env env) let-body))))
+        (t exp)))
+
+;; (defun compile-assign-envs (exprs env)
+;;   (map compile-assign-env exprs))
+
+(defun compile-file (exps env)
+  (let (((exps . main-body) (split-file exps)))
+    (println exps)
+    (println main-body)
+    (println (map (curry-2nd compile-assign-env env) main-body))
+    `(,$DEFMAIN ,@main-body)
+))
+
+
 (defun render-file (exps env)
   (let ((ret '())
-        (1st t))
+          (1st t))
 
-    ;;(println 'env env)
-    ;; emit empty line
-    (if exps (push "" ret))
+      ;;(println 'env env)
+      ;; emit empty line
+      (if exps (push "" ret))
 
-    (dolist (exp exps)
-      (if 1st
-          (= 1st nil)
-        (unless (equal "" (car ret))
-          (push "" ret))) ;; TODO filter defmacro calls before calling this (multi-pass architecture)
-      (when +show-comment+
-        (push (+ "// " (repr exp)) ret))
-      (= ret (append (nreverse (render-stmt exp env nil)) ret)))
+      (dolist (exp exps)
+        (if 1st
+            (= 1st nil)
+          (unless (equal "" (car ret))
+            (push "" ret))) ;; TODO filter defmacro calls before calling this (multi-pass architecture)
+        (when +show-comment+
+          (push (+ "// " (repr exp)) ret))
+        (= ret (append (nreverse (render-stmt exp env nil)) ret)))
 
-    (nreverse ret)))
+      (nreverse ret)))
 
 ;;; stmt
 
@@ -123,7 +185,7 @@
      -1)))
 
 (defun render-expr (exp env ctx)
-  ;;(println '// 'EXPR)
+  (println '// 'EXPR exp)
   (cond
     ((symbol? exp)
      (render-name exp))
@@ -192,4 +254,8 @@
   (symbol-name exp))
 
 (dolist (arg *argv*)
-  (emit-tree (render-file (read-file arg) (make-env nil))))
+  (let ((exps (read-file arg)))
+    (let ((exps (compile-file exps (make-env))))
+      (println exps)
+      ;(emit-tree (render-file  (make-env nil)))
+      )))
