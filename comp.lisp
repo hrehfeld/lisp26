@@ -1,6 +1,5 @@
 ;; -*- compile-command: "./lisp load comp.lisp < comp-arith.lisp > comp-arith.cpp" -*-
 (load-file "std.lisp")
-(load-file "env.lisp") ; TODO remove this line once core env is fixed
 
 (defun put-string (str)
   (stream-put-string *print-stream* str))
