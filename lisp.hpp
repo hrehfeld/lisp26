@@ -521,6 +521,8 @@ void p_float(PrintFun rec, Expr out, Expr exp);
 Expr make_number(I64 value);
 I64 number_value(Expr exp);
 
+Bool number_equal(Expr a, Expr b);
+
 Expr number_neg(Expr a);
 Expr number_add(Expr a, Expr b);
 Expr number_sub(Expr a, Expr b);
