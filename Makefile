@@ -1,4 +1,6 @@
 
+DEBUG = 0
+
 CXX = g++
 CXXFLAGS = -std=c++11 -Wall -Wextra -Wno-implicit-fallthrough -Wno-unused-parameter -Wpedantic
 # if we need to disable some more useless ones from extra
@@ -18,7 +20,14 @@ CXXFLAGS = -std=c++11 -Wall -Wextra -Wno-implicit-fallthrough -Wno-unused-parame
 # -Wno-shift-negative-value (in C++03 and in C99 and newer)
 # -Wno-unused-but-set-parameter (only with -Wunused or -Wall)
 
+ifeq ($(DEBUG), 1)
+CXXFLAGS += -g
+#CXXFLAGS += -rdynamic # TODO doesn't work with apple clang "g++"
+CXXFLAGS += -O0
+else
 CXXFLAGS += -O2
+endif
+
 BIN = lisp lide
 MOD = bignum builtin builtin_misc closure coerce cons cons_bind cons_impl core env env_install env_test error eval expr fixnum float gensym hash hash_bind hash_impl list meta number pointer printer reader reader_bind reader_test sdl2 spooky stream stream_impl string symbol system test time util vector
 OBJ = $(MOD:%=%.o)
