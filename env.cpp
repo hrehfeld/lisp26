@@ -155,6 +155,7 @@ static Expr env_find_global(Expr env, Expr var)
 Expr make_env(Expr outer)
 {
     //rformat("MAKE-ENV {}\n", outer);
+	// env: (( names . values) . outer-env)
     return cons(cons(nil, nil), outer);
 }
 
