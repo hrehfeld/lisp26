@@ -70,10 +70,8 @@ random-config:
 	$(CXX) -c $(CXXFLAGS) $< -o $@
 
 stream.o: stream.cpp lisp.hpp config.hpp stream_impl.hpp
-	$(CXX) -c $(CXXFLAGS) $< -o $@
 
 stream_impl.o: stream_impl.cpp lisp.hpp config.hpp stream_impl.hpp
-	$(CXX) -c $(CXXFLAGS) $< -o $@
 
 lisp: $(OBJ) lisp.o
 	$(CXX) $(LDFLAGS) $^ -lSDL2 -o $@
