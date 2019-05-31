@@ -18,6 +18,7 @@ CXXFLAGS = -std=c++11 -Wall -Wextra -Wno-implicit-fallthrough -Wno-unused-parame
 # -Wno-shift-negative-value (in C++03 and in C99 and newer)
 # -Wno-unused-but-set-parameter (only with -Wunused or -Wall)
 
+CXXFLAGS += -O2
 BIN = lisp lide
 MOD = bignum builtin builtin_misc closure coerce cons cons_bind cons_impl core env env_install env_test error eval expr fixnum float gensym hash hash_bind hash_impl list meta number pointer printer reader reader_bind reader_test sdl2 spooky stream stream_impl string symbol system test time util vector
 OBJ = $(MOD:%=%.o)
@@ -54,37 +55,37 @@ random-config:
 	python3 fuzz.py random
 
 %.o: %.cpp lisp.hpp config.hpp
-	$(CXX) -c $(CXXFLAGS) -O2 $< -o $@
+	$(CXX) -c $(CXXFLAGS) $< -o $@
 
 stream.o: stream.cpp lisp.hpp config.hpp stream_impl.hpp
-	$(CXX) -c $(CXXFLAGS) -O2 $< -o $@
+	$(CXX) -c $(CXXFLAGS) $< -o $@
 
 stream_impl.o: stream_impl.cpp lisp.hpp config.hpp stream_impl.hpp
-	$(CXX) -c $(CXXFLAGS) -O2 $< -o $@
+	$(CXX) -c $(CXXFLAGS) $< -o $@
 
 lisp: $(OBJ) lisp.o
 	$(CXX) -Wall -O2 $^ -lSDL2 -o $@
 
 lide: lide.cpp $(RUNTIME)
-	$(CXX) $(CXXFLAGS) -O2 $< -lSDL2 -o $@
+	$(CXX) $(CXXFLAGS) $< -lSDL2 -o $@
 
 hello.cpp: hello.lisp comp.lisp std.lisp lisp
 	./lisp load comp.lisp < $< > $@
 
 hello: hello.cpp $(RUNTIME)
-	$(CXX) $(CXXFLAGS) -O2 $< -lSDL2 -o $@
+	$(CXX) $(CXXFLAGS) $< -lSDL2 -o $@
 
 comp.cpp: comp.lisp std.lisp lisp
 	./lisp load comp.lisp < $< > $@
 
 comp: comp.cpp $(RUNTIME)
-	$(CXX) $(CXXFLAGS) -O2 $< -lSDL2 -o $@
+	$(CXX) $(CXXFLAGS) $< -lSDL2 -o $@
 
 blah.cpp: blah.lisp comp.lisp std.lisp lisp
 	./lisp load comp.lisp < $< > $@
 
 blah: blah.cpp $(RUNTIME)
-	$(CXX) $(CXXFLAGS) -O2 $< -lSDL2 -o $@
+	$(CXX) $(CXXFLAGS) $< -lSDL2 -o $@
 
 %.py: %.lisp lisp2py.lisp lisp2x.lisp std.lisp lisp
 	./lisp load lisp2py.lisp --no-comments $< > $@
