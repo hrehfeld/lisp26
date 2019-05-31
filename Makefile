@@ -19,13 +19,16 @@ CXXFLAGS = -std=c++11 -Wall -Wextra -Wno-implicit-fallthrough -Wno-unused-parame
 # -Wno-uninitialized
 # -Wno-shift-negative-value (in C++03 and in C99 and newer)
 # -Wno-unused-but-set-parameter (only with -Wunused or -Wall)
+LDFLAGS = -Wall
 
 ifeq ($(DEBUG), 1)
 CXXFLAGS += -g
 #CXXFLAGS += -rdynamic # TODO doesn't work with apple clang "g++"
 CXXFLAGS += -O0
+LDFLAGS += O0
 else
 CXXFLAGS += -O2
+LDFLAGS += -O2
 endif
 
 BIN = lisp lide
@@ -73,7 +76,7 @@ stream_impl.o: stream_impl.cpp lisp.hpp config.hpp stream_impl.hpp
 	$(CXX) -c $(CXXFLAGS) $< -o $@
 
 lisp: $(OBJ) lisp.o
-	$(CXX) -Wall -O2 $^ -lSDL2 -o $@
+	$(CXX) $(LDFLAGS) $^ -lSDL2 -o $@
 
 lide: lide.cpp $(RUNTIME)
 	$(CXX) $(CXXFLAGS) $< -lSDL2 -o $@
