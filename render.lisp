@@ -7,7 +7,7 @@
   (declare U8 do_gamma)
   (declare F32 x)
 
-  (coerce (clamp (* 255.0f (powf x OO_GAMMA)) 0 255) U8))
+  (coerce (clamp (* 255.0 (powf x OO_GAMMA)) 0 255) U8))
 
 (defun pack_color_f32 (r g b))
 
