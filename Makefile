@@ -49,7 +49,7 @@ e: extra
 d: default-config
 r: random-config
 
-extra: hello blah comp blub.py render.cpp build.py
+extra: hello blah comp blub.py render.cpp
 
 tests: lisp std.lisp std.test
 	./lisp test
