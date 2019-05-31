@@ -466,6 +466,13 @@ protected:
         }
 #endif
 
+#if ENABLE_FLOAT
+        if (is_float(exp))
+        {
+            return 1;
+        }
+#endif
+
         if (is_string(exp))
         {
             return 1;
