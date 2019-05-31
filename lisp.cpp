@@ -117,6 +117,7 @@ static int lisp_main(int argc, char ** argv)
     catch (Expr err)
     {
         fprintf(stderr, "unhandled error: %s\n", repr(err));
+        show_backtrace();
         show_error_context();
         ret = 1;
     }
