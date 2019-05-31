@@ -209,6 +209,15 @@ Bool fixnum_maybe_mul(Expr a, Expr b, Expr * out)
     return 1;
 }
 
+Expr fixnum_neg(Expr a)
+{
+    I64 const x = fixnum_value(a);
+    I64 const z = -x;
+    return make_fixnum(z);
+}
+
+
+
 Expr fixnum_add(Expr a, Expr b)
 {
     // TODO

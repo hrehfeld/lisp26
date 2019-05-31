@@ -456,6 +456,7 @@ Bool fixnum_maybe_add(Expr a, Expr b, Expr * out);
 Bool fixnum_maybe_sub(Expr a, Expr b, Expr * out);
 Bool fixnum_maybe_mul(Expr a, Expr b, Expr * out);
 
+Expr fixnum_neg(Expr a);
 Expr fixnum_add(Expr a, Expr b);
 Expr fixnum_sub(Expr a, Expr b);
 Expr fixnum_mul(Expr a, Expr b);
