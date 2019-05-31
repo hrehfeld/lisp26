@@ -20,6 +20,7 @@ CXXFLAGS = -std=c++11 -Wall -Wextra -Wno-implicit-fallthrough -Wno-unused-parame
 # -Wno-shift-negative-value (in C++03 and in C99 and newer)
 # -Wno-unused-but-set-parameter (only with -Wunused or -Wall)
 LDFLAGS = -Wall
+LDLIBS = -lSDL2
 
 ifeq ($(DEBUG), 1)
 CXXFLAGS += -g
@@ -74,28 +75,28 @@ stream.o: stream.cpp lisp.hpp config.hpp stream_impl.hpp
 stream_impl.o: stream_impl.cpp lisp.hpp config.hpp stream_impl.hpp
 
 lisp: $(OBJ) lisp.o
-	$(CXX) $(LDFLAGS) $^ -lSDL2 -o $@
+	$(CXX) $(LDFLAGS) $^ $(LDLIBS) -o $@
 
 lide: lide.cpp $(RUNTIME)
-	$(CXX) $(CXXFLAGS) $< -lSDL2 -o $@
+	$(CXX) $(CXXFLAGS) $< $(LDLIBS) -o $@
 
 hello.cpp: hello.lisp comp.lisp std.lisp lisp
 	./lisp load comp.lisp < $< > $@
 
 hello: hello.cpp $(RUNTIME)
-	$(CXX) $(CXXFLAGS) $< -lSDL2 -o $@
+	$(CXX) $(CXXFLAGS) $< $(LDLIBS) -o $@
 
 comp.cpp: comp.lisp std.lisp lisp
 	./lisp load comp.lisp < $< > $@
 
 comp: comp.cpp $(RUNTIME)
-	$(CXX) $(CXXFLAGS) $< -lSDL2 -o $@
+	$(CXX) $(CXXFLAGS) $< $(LDLIBS) -o $@
 
 blah.cpp: blah.lisp comp.lisp std.lisp lisp
 	./lisp load comp.lisp < $< > $@
 
 blah: blah.cpp $(RUNTIME)
-	$(CXX) $(CXXFLAGS) $< -lSDL2 -o $@
+	$(CXX) $(CXXFLAGS) $< $(LDLIBS) -o $@
 
 %.py: %.lisp lisp2py.lisp lisp2x.lisp std.lisp lisp
 	./lisp load lisp2py.lisp --no-comments $< > $@
