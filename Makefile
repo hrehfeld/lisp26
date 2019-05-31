@@ -37,6 +37,13 @@ MOD = bignum builtin builtin_misc closure coerce cons cons_bind cons_impl core e
 OBJ = $(MOD:%=%.o)
 CPP = $(MOD:%=%.cpp)
 
+PROG_LISP = $(wildcard tests/programs/*.lisp)
+#PROG_PY   = $(PROG_LISP:%.lisp=%.py)
+PROG_PY = tests/programs/hello.py tests/programs/blub.py
+#PROG_CPP  = $(PROG_LISP:%.lisp=%.cpp)
+PROG_CPP = tests/programs/hello.cpp tests/programs/blah.cpp tests/programs/comp.cpp
+PROG_BIN  = $(PROG_CPP:%.cpp=%)
+
 RUNTIME = runtime.hpp lisp.hpp config.hpp font.hpp
 
 all: $(BIN)
@@ -50,7 +57,7 @@ e: extra
 d: default-config
 r: random-config
 
-extra: hello blah comp blub.py render.cpp
+extra: $(PROG_BIN) $(PROG_PY)
 
 tests: lisp std.lisp std.test
 	./lisp test
@@ -80,29 +87,19 @@ lisp: $(OBJ) lisp.o
 lide: lide.cpp $(RUNTIME)
 	$(CXX) $(CXXFLAGS) $< $(LDLIBS) -o $@
 
-hello.cpp: hello.lisp comp.lisp std.lisp lisp
-	./lisp load comp.lisp < $< > $@
-
-hello: hello.cpp $(RUNTIME)
-	$(CXX) $(CXXFLAGS) $< $(LDLIBS) -o $@
-
-comp.cpp: comp.lisp std.lisp lisp
-	./lisp load comp.lisp < $< > $@
-
-comp: comp.cpp $(RUNTIME)
-	$(CXX) $(CXXFLAGS) $< $(LDLIBS) -o $@
-
-blah.cpp: blah.lisp comp.lisp std.lisp lisp
-	./lisp load comp.lisp < $< > $@
-
-blah: blah.cpp $(RUNTIME)
-	$(CXX) $(CXXFLAGS) $< $(LDLIBS) -o $@
-
-%.py: %.lisp lisp2py.lisp lisp2x.lisp std.lisp lisp
+tests/programs/%.py: tests/programs/%.lisp lisp2py.lisp lisp2x.lisp std.lisp lisp
 	./lisp load lisp2py.lisp --no-comments $< > $@
 
-render.cpp: render.lisp lisp2cpp.lisp lisp2x.lisp std.lisp lisp
+tests/programs/%.cpp: tests/programs/%.lisp lisp2cpp.lisp lisp2x.lisp std.lisp lisp
 	./lisp load lisp2cpp.lisp $< > $@
+
+# TODO merge comp into lisp2cpp and add --with-stub option to add main and runtime include
+tests/programs/hello.cpp: tests/programs/hello.lisp comp.lisp
+	./lisp load comp.lisp < $< > $@
+
+tests/programs/%: CXXFLAGS += -I.
+tests/programs/%: tests/programs/%.cpp $(RUNTIME)
+	$(CXX) $(CXXFLAGS) $< $(LDLIBS) -o $@
 
 # TODO
 
