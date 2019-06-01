@@ -55,9 +55,11 @@
            (let (((let-sym let-decls . let-body) exp))
              (list let-sym (make-env env) let-decls (recurse-list let-body))))
           (t exp))))
+
+(defun compile-unassign-env (exp)
   (cond ((any-named-op? exp 'let* 'let)
-         (let (((let-sym let-decls . let-body) exp))
-           (list let-sym (make-env env) let-decls (map (curry-2nd compile-assign-env env) let-body))))
+         (let (((let-sym _env let-decls . let-body) exp))
+           (list let-sym let-decls (map compile-unassign-env let-body))))
         (t exp)))
 
 ;; (defun compile-assign-envs (exprs env)
@@ -67,9 +69,10 @@
   (let (((exps . main-body) (split-file exps)))
     (println exps)
     (println main-body)
-    (println (map (curry-2nd compile-assign-env env) main-body))
-    `(,$DEFMAIN ,@main-body)
-))
+    (map compile-unassign-env
+         (let ((main-body (map (curry-2nd compile-assign-env env) main-body)))
+           (println main-body)
+           `(,$DEFMAIN ,@main-body)))))
 
 
 (defun render-file (exps env)
