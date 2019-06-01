@@ -55,13 +55,13 @@
          (recurse-list (curry map recurse)))
     (cond ((any-let? exp)
            (let (((let-sym let-decls . let-body) exp))
-             (list let-sym (make-env env) let-decls (recurse-list let-body))))
+             `(,let-sym ,(make-env env) ,let-decls ,@(recurse-list let-body))))
           (t exp))))
 
 (defun compile-unassign-env (exp)
   (cond ((any-let? exp)
          (let (((let-sym _env let-decls . let-body) exp))
-           (list let-sym let-decls (map compile-unassign-env let-body))))
+           `(,let-sym ,let-decls ,@(map compile-unassign-env let-body))))
         (t exp)))
 
 ;; (defun compile-assign-envs (exprs env)
