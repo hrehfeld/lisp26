@@ -74,7 +74,7 @@
 #define BIND_SYMBOL             1 // 1 0 1
 #define BIND_SYSTEM             1 // 1 0 1
 #define BIND_HASH               1 // 1 0 1
-#define BIND_TYPE               0 // 0 0 1
+#define BIND_TYPE               1 // 1 0 1
 
 #define READER_QUOTE            1 // 1 0 1
 #define READER_BACKQUOTE        1 // 1 0 1
