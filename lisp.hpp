@@ -120,6 +120,10 @@ typedef struct
 #define DATA_BITS (U64VAL(64) - TYPE_BITS)
 #define DATA_MASK ((U64VAL(1) << DATA_BITS) - U64VAL(1))
 
+// NOTE when adding new types, you have to also add them to:
+// - f_type
+// - print
+
 enum /* TODO proper ordering? */
 {
     TYPE_NIL = 0,

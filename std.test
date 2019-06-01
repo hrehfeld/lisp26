@@ -25,7 +25,7 @@
 
 ((type #(1 2 3))   => vector)
 
-((type cons) => builtin)
+((type cons) => builtin-fun)
 
 ((type *read-stream*) => stream)
 
