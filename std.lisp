@@ -424,5 +424,8 @@
 (defun fun-switch-binary-params (f)
   (lambda (a b) (f b a)))
 
+(defun curry (f . curried-args)
+  (lambda args (apply f `(,@curried-args ,@args))))
+
 (defun curry-2nd (f arg)
   (lambda args (apply f `(,@args ,arg))))
