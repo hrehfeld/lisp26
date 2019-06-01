@@ -4,8 +4,6 @@
 
 (defconstant +show-comment+ nil)
 
-(defconstant $DEFMAIN '$defmain)
-
 (defun split-file (exps)
   (binary-classify defun? exps))
 
