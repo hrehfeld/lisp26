@@ -74,7 +74,7 @@
     (map compile-unassign-env
          (let ((main-body (map (curry-2nd compile-assign-env env) main-body)))
            (println main-body)
-           `(,$DEFMAIN ,@main-body)))))
+           `(defun main () ,@main-body)))))
 
 
 (defun render-file (exps env)
