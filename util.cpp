@@ -107,6 +107,10 @@ Expr f_type(Expr exp)
         return SYM_cons;
     case TYPE_STRING:
         return SYM_string;
+#if ENABLE_FLOAT
+    case TYPE_FLOAT:
+        return QUOTE(float);
+#endif
     case TYPE_POINTER:
         return QUOTE(pointer);
     case TYPE_FIXPTR:
