@@ -49,6 +49,12 @@
   )
 
 (defun compile-assign-env (exp env)
+  (let* ((recurse (curry  (fun-switch-binary-params compile-assign-env) env))
+         (recurse-list (curry map recurse)))
+    (cond ((any-named-op? exp 'let* 'let)
+           (let (((let-sym let-decls . let-body) exp))
+             (list let-sym (make-env env) let-decls (recurse-list let-body))))
+          (t exp))))
   (cond ((any-named-op? exp 'let* 'let)
          (let (((let-sym let-decls . let-body) exp))
            (list let-sym (make-env env) let-decls (map (curry-2nd compile-assign-env env) let-body))))
