@@ -285,6 +285,8 @@ b" "\n") => ("a" "b"))
 ;; => 20)
 
 ;;functions
+(
+ ((fun-switch-binary-params -) 2 3) => 1)
 ( ((curry-2nd + "foo") "bar")
 => "barfoo")
 
