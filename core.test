@@ -59,3 +59,19 @@
 ((block nil 1 2 3 4) => 4)
 ((block nil (return-from nil 42)) => 42)
 ((block nil 1 2 (return-from nil 111) 3 4) => 111)
+
+;;; TODO Hauke's tests
+
+
+(1 => 1) ; ((progn 1) 1)
+(1.000000 => 1.000000) ; ((progn 1.000000) 1.000000)
+('nil => nil) ; ((progn 'nil) nil)
+('1 => 1) ; ((progn '1) 1)
+('() => ()) ; ((progn '()) ())
+(`1 => 1) ; ((progn `1) 1)
+(`"test" => "test") ; ((progn `"test") "test")
+(`foo => foo) ; ((progn `foo) 'foo)
+(`1 => 1) ; ((progn `1) 1)
+(`nil => nil) ; ((progn `nil) nil)
+(`(foo) => (foo)) ; ((progn `(foo)) '(foo))
+(`(foo ,1) => (foo 1)) ; ((progn `(foo ,1)) '(foo 1))
