@@ -235,11 +235,11 @@
       (read-from-stream (car args))
       (read-from-stream *read-stream*)))
 
-(defun nth (exp idx)
+(defun nth (idx exp)
   (cond ((cons? exp) ; TODO use while and count down index?
          (if (== idx 0)
              (car exp)
-             (nth (cdr exp) (- idx 1))))
+             (nth (- idx 1) (cdr exp))))
 
         ((vector? exp)
          (vector-get exp idx))
@@ -383,15 +383,15 @@
 ;;        (v (gensym)))
 ;;    `(let ((,v ,seq))
 ;;       (dolen-1 (,i ,v)
-;;         (let ((,a (nth ,v ,i))
-;;               (,b (nth ,v (+ ,i 1))))
+;;         (let ((,a (nth ,i ,v))
+;;               (,b (nth (+ ,i 1) ,v)))
 ;;           ,@body)))))
 
 (defun sorted? (vec)
   ;;(dotimes (i (- (len vec) 1))
   (dolen-1 (i vec)
     ;;(println i)
-    (if (> (nth vec i) (nth vec (+ i 1)))
+    (if (> (nth i vec) (nth (+ i 1) vec))
         (return nil)))
   t)
 

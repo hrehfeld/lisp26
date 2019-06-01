@@ -26,7 +26,7 @@
 
     (let ((ret nil))
       (dorange (i lo hi st)
-               (push (nth seq i) ret))
+               (push (nth i seq) ret))
 
       (= ret (nreverse ret))
 
