@@ -48,16 +48,18 @@
      (error "cannot compile expr " exp)))
   )
 
+(defun any-let? (exp) (any-named-op? exp 'let* 'let))
+
 (defun compile-assign-env (exp env)
   (let* ((recurse (curry  (fun-switch-binary-params compile-assign-env) env))
          (recurse-list (curry map recurse)))
-    (cond ((any-named-op? exp 'let* 'let)
+    (cond ((any-let? exp)
            (let (((let-sym let-decls . let-body) exp))
              (list let-sym (make-env env) let-decls (recurse-list let-body))))
           (t exp))))
 
 (defun compile-unassign-env (exp)
-  (cond ((any-named-op? exp 'let* 'let)
+  (cond ((any-let? exp)
          (let (((let-sym _env let-decls . let-body) exp))
            (list let-sym let-decls (map compile-unassign-env let-body))))
         (t exp)))
