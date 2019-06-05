@@ -75,4 +75,4 @@
       (if (pred elt)
           (push elt a)
         (push elt b)))
-    (cons (nreverse a) (nreverse b))))
+    (list (nreverse a) (nreverse b))))
