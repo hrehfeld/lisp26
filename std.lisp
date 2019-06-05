@@ -98,17 +98,17 @@
 
 ;;; assignment
 
-(defmacro += (var val)
-  `(= ,var (+ ,var ,val)))
+(defmacro += (var . vals)
+  `(= ,var (+ ,var ,@vals)))
 
-(defmacro -= (var val)
-  `(= ,var (- ,var ,val)))
+(defmacro -= (var . vals)
+  `(= ,var (- ,var ,@vals)))
 
-(defmacro *= (var val)
-  `(= ,var (* ,var ,val)))
+(defmacro *= (var . vals)
+  `(= ,var (* ,var ,@vals)))
 
-(defmacro /= (var val)
-  `(= ,var (/ ,var ,val)))
+(defmacro /= (var . vals)
+  `(= ,var (/ ,var ,@vals)))
 
 ;; TODO do we want to (define *special*) first?
 ;;(define *special* nil)
