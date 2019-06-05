@@ -31,13 +31,11 @@ static Expr fun_env_def(Expr args, Expr env, void * user)
 
     if (nargs == 2)
     {
-        env_def(env, arg1, arg2);
-        return nil;
+        return env_def(env, arg1, arg2);
     }
     else if (nargs == 3)
     {
-        env_def(arg1, arg2, arg3);
-        return nil;
+        return env_def(arg1, arg2, arg3);
     }
     else
     {
