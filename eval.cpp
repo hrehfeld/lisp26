@@ -638,11 +638,6 @@ protected:
 
 #if ENABLE_BACKQUOTE
 
-    inline Bool is_unquote_splicing(Expr exp)
-    {
-        return is_op(exp, SYM_unquote_splicing);
-    }
-
     /* awfully recursive, hacky implementation */
     Expr backquote_list(Expr seq, Expr env)
     {

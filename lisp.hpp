@@ -921,6 +921,11 @@ inline static Bool is_unquote(Expr exp)
     return is_op(exp, SYM_unquote);
 }
 
+inline static Bool is_unquote_splicing(Expr exp)
+{
+    return is_op(exp, SYM_unquote_splicing);
+}
+
 #endif
 
 Expr make_truth(Bool b);
