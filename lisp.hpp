@@ -724,7 +724,7 @@ Expr make_env(Expr outer);
 Expr env_vars(Expr env);
 
 /* local */
-void env_def(Expr env, Expr var, Expr val);
+Expr env_def(Expr env, Expr var, Expr val);
 void env_del(Expr env, Expr var);
 Bool env_owns(Expr env, Expr var);
 
