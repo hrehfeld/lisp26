@@ -35,7 +35,7 @@ Expr env_vars(Expr env)
     return ERROR("not implemented");
 }
 
-void env_def(Expr env, Expr var, Expr val)
+Expr env_def(Expr env, Expr var, Expr val)
 {
     //printf("ENV_BIND %s %s\n", repr(var), repr(val));
     Expr const hash = env_hash(env);
@@ -45,6 +45,7 @@ void env_def(Expr env, Expr var, Expr val)
     }
     hash_put(hash, var, val);
     //println(hash);
+    return val;
 }
 
 void env_del(Expr env, Expr var)
@@ -67,7 +68,7 @@ Bool env_has(Expr env, Expr var)
     return 0;
 }
 
-void env_set(Expr env, Expr var, Expr val)
+Expr env_set(Expr env, Expr var, Expr val)
 {
     while (env)
     {
@@ -75,7 +76,7 @@ void env_set(Expr env, Expr var, Expr val)
         if (hash_has(hash, var)) /* TODO refactor into hash_maybe_put? */
         {
             hash_put(hash, var, val);
-            return;
+            return val;
         }
         else
         {
@@ -83,7 +84,7 @@ void env_set(Expr env, Expr var, Expr val)
         }
     }
 
-    ERROR("unbound variable %s", repr(var));
+    return ERROR("unbound variable %s", repr(var));
 }
 
 Expr env_lookup(Expr env, Expr var)
@@ -186,7 +187,7 @@ Expr env_outer(Expr env)
     return cdr(env);
 }
 
-void env_def(Expr env, Expr var, Expr val)
+Expr env_def(Expr env, Expr var, Expr val)
 {
     Expr const vals = env_find(env, var);
     if (vals)
@@ -202,6 +203,7 @@ void env_def(Expr env, Expr var, Expr val)
 #if PROFILE_LOOKUP
     _max_vars = std::max(_max_vars, list_length(env_vars(env)));
 #endif
+    return val;
 }
 
 void env_del(Expr env, Expr var)
@@ -246,18 +248,16 @@ Bool env_has(Expr env, Expr var)
     return env_find_global(env, var) != nil;
 }
 
-void env_set(Expr env, Expr var, Expr val)
+Expr env_set(Expr env, Expr var, Expr val)
 {
     Expr const vals = env_find_global(env, var);
     if (vals)
     {
         set_car(vals, val);
-        return;
+        return val;
     }
-    else
-    {
-        ERROR("unbound variable %s", repr(var));
-    }
+
+    return ERROR("unbound variable %s", repr(var));
 }
 
 Expr env_lookup(Expr env, Expr var)

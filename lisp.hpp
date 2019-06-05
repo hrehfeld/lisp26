@@ -730,7 +730,7 @@ Bool env_owns(Expr env, Expr var);
 
 /* global */
 Bool env_has(Expr env, Expr var);
-void env_set(Expr env, Expr var, Expr val);
+Expr env_set(Expr env, Expr var, Expr val);
 
 Expr env_lookup(Expr env, Expr var);
 Bool env_maybe_lookup(Expr env, Expr var, Expr * val);

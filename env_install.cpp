@@ -97,13 +97,11 @@ static Expr fun_env_set(Expr args, Expr env, void * user)
 
     if (nargs == 2)
     {
-        env_set(env, arg1, arg2);
-        return nil;
+        return env_set(env, arg1, arg2);
     }
     else if (nargs == 3)
     {
-        env_set(arg1, arg2, arg3);
-        return nil;
+        return env_set(arg1, arg2, arg3);
     }
     else
     {
