@@ -128,6 +128,15 @@ static void print_helper(System * sys, Expr out, Expr exp)
     }
 #endif
 
+#if PRINTER_UNQUOTE_SPLICE
+    else if (is_unquote_splicing(exp))
+    {
+        stream_put_char(out, ',');
+        stream_put_char(out, '@');
+        print_helper(sys, out, cadr(exp));
+    }
+#endif
+
     else if (is_string(exp))
     {
         p_string(print_helper, out, exp);
