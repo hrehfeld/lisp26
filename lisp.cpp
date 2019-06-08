@@ -38,9 +38,17 @@ static int lisp_main(int argc, char ** argv)
                 {
                     load_core = 1;
                 }
+                else if (!strcmp("--no-core", argv[i]))
+                {
+                    load_core = 0;
+                }
                 else if (!strcmp("--sdl2", argv[i]))
                 {
                     load_sdl2 = 1;
+                }
+                else if (!strcmp("--no-sdl2", argv[i]))
+                {
+                    load_sdl2 = 0;
                 }
                 else if (!strcmp("--show-pass", argv[i]))
                 {
@@ -80,7 +88,7 @@ static int lisp_main(int argc, char ** argv)
 
         if (load_core)
         {
-            system_bind_core(env); // TODO allow user to disable this?
+            system_bind_core(env);
         }
 
         if (load_sdl2)
