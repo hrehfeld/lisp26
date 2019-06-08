@@ -286,7 +286,7 @@ char const * repr(Expr exp)
     return string_value(repr_as_expr(exp));
 }
 
-void print(Expr exp)
+void sys_print(System * sys, Expr exp)
 {
     Expr stream = make_file_output_stream(PRINT_FILE, NULL, 0); /* TODO make a function return the print stream */
     clear_marks();
@@ -294,12 +294,22 @@ void print(Expr exp)
     stream_close(stream);
 }
 
-void println(Expr exp)
+void sys_println(System * sys, Expr exp)
 {
-    Expr stream = make_file_output_stream(PRINT_FILE, NULL, 0);
+    Expr stream = make_file_output_stream(PRINT_FILE, NULL, 0); /* TODO make a function return the print stream */
     clear_marks();
     println_to_stream(stream, exp);
     stream_close(stream);
+}
+
+void print(Expr exp)
+{
+    sys_print(&g_sys, exp);
+}
+
+void println(Expr exp)
+{
+    sys_println(&g_sys, exp);
 }
 
 void print_with_env(Expr exp, Expr env)
