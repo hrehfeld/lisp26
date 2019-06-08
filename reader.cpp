@@ -596,7 +596,7 @@ Expr read_with_env(Expr env)
     else
     {
         // TODO make a proper prompt input stream
-        Expr in = make_file_input_stream(stdin, 0);
+        Expr in = make_file_input_stream(stdin, NULL, 0);
         Expr ret = read_from_stream(in);
         stream_close(in);
         return ret;

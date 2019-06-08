@@ -32,7 +32,7 @@ static void ensure_capacity(Stream * stream, size_t cap)
     }
 }
 
-void _make_file_input_stream(Stream * stream, FILE * file, Bool close_on_free)
+void _make_file_input_stream(Stream * stream, FILE * file, char const * name, Bool close_on_free)
 {
     ASSERT(stream);
 
@@ -42,9 +42,14 @@ void _make_file_input_stream(Stream * stream, FILE * file, Bool close_on_free)
         STREAM_TYPE_FILE_INPUT_CLOSE :
         STREAM_TYPE_FILE_INPUT;
     stream->file = file;
+
+    if (name)
+    {
+        stream->name = strdup(name);
+    }
 }
 
-void _make_file_output_stream(Stream * stream, FILE * file, Bool close_on_free)
+void _make_file_output_stream(Stream * stream, FILE * file, char const * name, Bool close_on_free)
 {
     ASSERT(stream);
 
@@ -54,6 +59,11 @@ void _make_file_output_stream(Stream * stream, FILE * file, Bool close_on_free)
         STREAM_TYPE_FILE_OUTPUT_CLOSE :
         STREAM_TYPE_FILE_OUTPUT;
     stream->file = file;
+
+    if (name)
+    {
+        stream->name = strdup(name);
+    }
 }
 
 // TODO add option to copy the value?
@@ -99,6 +109,11 @@ void _free_stream(Stream * stream)
         ASSERT(stream->buf);
         free(stream->buf);
         break;
+    }
+
+    if (stream->name)
+    {
+        free(stream->name);
     }
 
     memset(stream, 0, sizeof(Stream));

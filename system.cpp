@@ -90,7 +90,7 @@ static void system_gc(Expr * env)
 void system_repl(Expr env)
 {
      // TODO make a proper prompt input stream
-    Expr in = make_file_input_stream(stdin, 0);
+    Expr in = make_file_input_stream(stdin, "<stdin>", 0);
     Expr exp = nil;
     Expr ret = nil;
 

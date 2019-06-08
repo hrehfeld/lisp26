@@ -281,7 +281,7 @@ char const * repr(Expr exp)
 
 void print(Expr exp)
 {
-    Expr stream = make_file_output_stream(PRINT_FILE, 0);
+    Expr stream = make_file_output_stream(PRINT_FILE, NULL, 0); /* TODO make a function return the print stream */
     clear_marks();
     print_to_stream(stream, exp);
     stream_close(stream);
@@ -289,7 +289,7 @@ void print(Expr exp)
 
 void println(Expr exp)
 {
-    Expr stream = make_file_output_stream(PRINT_FILE, 0);
+    Expr stream = make_file_output_stream(PRINT_FILE, NULL, 0);
     clear_marks();
     println_to_stream(stream, exp);
     stream_close(stream);
@@ -479,7 +479,7 @@ static Expr format_with_args(Expr out, Expr fmt, Expr args)
     {
         /* TODO unwind-protect stream_close */
         /* TODO respect *print-stream* */
-        out = make_file_output_stream(PRINT_FILE, 0);
+        out = make_file_output_stream(PRINT_FILE, NULL, 0);
         format_to_stream(out, fmt, args);
         stream_close(out);
         return nil;

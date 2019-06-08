@@ -632,11 +632,11 @@ Expr b_coerce(Expr args, Expr env, void * user);
 
 Bool is_stream(Expr exp);
 
-Expr make_file_input_stream(FILE * file, Bool close_on_free);
+Expr make_file_input_stream(FILE * file, char const * name, Bool close_on_free);
 Expr make_file_input_stream_from_path(char const * ifn);
 
-Expr make_file_output_stream(FILE * file, Bool close_on_free);
-Expr make_file_output_stream_from_path(char const * ifn);
+Expr make_file_output_stream(FILE * file, char const * name, Bool close_on_free);
+Expr make_file_output_stream_from_path(char const * ofn);
 
 Expr make_string_input_stream(char const * str);
 Expr make_string_output_stream();

@@ -76,7 +76,7 @@ Bool is_stream(Expr exp)
     return expr_type(exp) == TYPE_STREAM;
 }
 
-Expr make_file_input_stream(FILE * file, Bool close_on_free)
+Expr make_file_input_stream(FILE * file, char const * name, Bool close_on_free)
 {
     I32 index = alloc_index();
     if (index == -1)
@@ -85,7 +85,7 @@ Expr make_file_input_stream(FILE * file, Bool close_on_free)
     }
 
     Stream * stream = lookup(index);
-    _make_file_input_stream(stream, file, close_on_free);
+    _make_file_input_stream(stream, file, name, close_on_free);
     stream->index = index; // actually unused
     return make_expr(TYPE_STREAM, (U64) index);
 }
@@ -98,10 +98,10 @@ Expr make_file_input_stream_from_path(char const * ifn)
         return ERROR("cannot open %s", ifn);
     }
 
-    return make_file_input_stream(file, 1);
+    return make_file_input_stream(file, ifn, 1);
 }
 
-Expr make_file_output_stream(FILE * file, Bool close_on_free)
+Expr make_file_output_stream(FILE * file, char const * name, Bool close_on_free)
 {
     I32 index = alloc_index();
     if (index == -1)
@@ -110,20 +110,20 @@ Expr make_file_output_stream(FILE * file, Bool close_on_free)
     }
 
     Stream * stream = lookup(index);
-    _make_file_output_stream(stream, file, close_on_free);
+    _make_file_output_stream(stream, file, name, close_on_free);
     stream->index = index; // actually unused
     return make_expr(TYPE_STREAM, (U64) index);
 }
 
-Expr make_file_output_stream_from_path(char const * ifn)
+Expr make_file_output_stream_from_path(char const * ofn)
 {
-    FILE * file = fopen(ifn, "wb");
+    FILE * file = fopen(ofn, "wb");
     if (!file)
     {
-        return ERROR("cannot open %s\n", ifn);
+        return ERROR("cannot open %s\n", ofn);
     }
 
-    return make_file_output_stream(file, 1);
+    return make_file_output_stream(file, ofn, 1);
 }
 
 Expr make_string_input_stream(char const * str)
@@ -257,7 +257,8 @@ static Expr b_make_file_input_stream(Expr args, Expr env, void * user)
         return ERROR("illegal arguments");
     }
 
-    return make_file_input_stream(fopen(string_value(exp), "rt"), 1);
+    char const * name = string_value(exp);
+    return make_file_input_stream(fopen(name, "rt"), name, 1);
 }
 
 static Expr b_make_file_output_stream(Expr args, Expr env, void * user)
@@ -268,7 +269,8 @@ static Expr b_make_file_output_stream(Expr args, Expr env, void * user)
         return ERROR("illegal arguments");
     }
 
-    return make_file_output_stream(fopen(string_value(exp), "wt"), 1);
+    char const * name = string_value(exp);
+    return make_file_output_stream(fopen(name, "wt"), name, 1);
 }
 
 static Expr f_make_string_input_stream(Expr string)

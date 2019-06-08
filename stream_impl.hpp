@@ -16,10 +16,12 @@ typedef struct
         I32 index;
         I32 next;
     };
+
+    char * name; /* owned by stream, may be NULL */
 } Stream;
 
-void _make_file_input_stream(Stream * stream, FILE * file, Bool close_on_free);
-void _make_file_output_stream(Stream * stream, FILE * file, Bool close_on_free);
+void _make_file_input_stream(Stream * stream, FILE * file, char const * name, Bool close_on_free);
+void _make_file_output_stream(Stream * stream, FILE * file, char const * name, Bool close_on_free);
 
 void _make_string_input_stream(Stream * stream, char const * str);
 void _make_string_output_stream(Stream * stream);
