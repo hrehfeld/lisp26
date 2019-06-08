@@ -28,6 +28,8 @@ void _make_string_output_stream(Stream * stream);
 
 void _free_stream(Stream * stream);
 
+char const * _stream_name(Stream * stream);
+
 /* output-only */
 
 void _stream_put_cstring(Stream * out, char const * str); // TODO rename to put_cstring

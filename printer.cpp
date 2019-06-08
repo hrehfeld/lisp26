@@ -175,7 +175,14 @@ static void print_helper(System * sys, Expr out, Expr exp)
 
     else if (is_stream(exp))
     {
-        stream_put_cstring(out, "#:<stream>");
+        char const * name = stream_name(exp);
+        stream_put_cstring(out, "#:<stream");
+        if (name)
+        {
+            stream_put_cstring(out, " ");
+            stream_put_cstring(out, name);
+        }
+        stream_put_cstring(out, ">");
     }
 
 #if PRINTER_VECTOR

@@ -666,6 +666,8 @@ void stream_show_status();
 
 #endif
 
+char const * stream_name(Expr exp);
+
 void bind_stream(Expr env);
 
 /* list *******/

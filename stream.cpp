@@ -249,6 +249,12 @@ void stream_show_status()
     printf("\n");
 }
 
+char const * stream_name(Expr exp)
+{
+    char const * name = _stream_name(stream_impl(exp));
+    return name;
+}
+
 static Expr b_make_file_input_stream(Expr args, Expr env, void * user)
 {
     Expr exp = nil;
@@ -303,6 +309,16 @@ static Expr b_stream_close(Expr args, Expr env, void * user)
 {
     stream_close(car(args));
     return nil;
+}
+
+static Expr b_stream_name(Expr args, Expr env, void * user)
+{
+    char const * name = stream_name(car(args));
+    if (!name)
+    {
+        return nil;
+    }
+    return make_string(name);
 }
 
 static Expr f_stream_put_string(Expr stream, Expr string)
@@ -367,6 +383,8 @@ void bind_stream(Expr env)
     env_def(env, QUOTE(make-string-output-stream), make_builtin_fun(b_make_string_output_stream, NULL));
 
     env_def(env, QUOTE(stream-close             ), make_builtin_fun(b_stream_close             , NULL));
+    env_def(env, QUOTE(stream-name              ), make_builtin_fun(b_stream_name              , NULL));
+
     env_def(env, QUOTE(stream-put-string        ), make_builtin_fun(b_stream_put_string        , NULL));
     env_def(env, QUOTE(stream-put-char          ), make_builtin_fun(b_stream_put_char          , NULL));
     env_def(env, QUOTE(stream-to-string         ), make_builtin_fun(b_stream_to_string         , NULL));

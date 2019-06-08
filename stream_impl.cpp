@@ -119,6 +119,11 @@ void _free_stream(Stream * stream)
     memset(stream, 0, sizeof(Stream));
 }
 
+char const * _stream_name(Stream * stream)
+{
+    return stream->name;
+}
+
 void _stream_put_cstring(Stream * out, char const * str)
 {
     ASSERT(out);
