@@ -882,7 +882,7 @@ U32  num_to_u32(Expr val);
 Expr u64_to_num(U64 val);
 U64  num_to_u64(Expr val);
 
-U64  num_to_i64(Expr val);
+I64  num_to_i64(Expr val);
 
 Expr size_to_num(size_t val);
 size_t num_to_size(Expr val);

@@ -159,7 +159,7 @@ U64 num_to_u64(Expr val)
     return (U64) fixnum_value(val);
 }
 
-U64 num_to_i64(Expr val)
+I64 num_to_i64(Expr val)
 {
     return (I64) fixnum_value(val);
 }
