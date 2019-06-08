@@ -60,12 +60,12 @@ r: random-config
 extra: $(PROG_BIN) $(PROG_PY)
 
 # TODO add std/*.lisp files as dependencies
-tests: lisp std.lisp std.test std-sort.test
+tests: lisp std.lisp std.test std/sort.test
 	./lisp test
 	./lisp test core.test
 	./lisp test env.test
 	./lisp test std.lisp std.test
-	./lisp test std.lisp std-sort.test
+	./lisp test std.lisp std/sort.test
 	./lisp test meta.lisp meta.test
 	./lisp test hash.lisp hash.test
 	./lisp test env.lisp env.test
