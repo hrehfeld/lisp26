@@ -24,6 +24,7 @@ static int lisp_main(int argc, char ** argv)
         char const * cmd = NULL;
         char const * ifn = NULL;
 
+        Bool bind_args = 1;
         Bool load_core = 1;
         Bool load_sdl2 = 0;
 
@@ -49,6 +50,14 @@ static int lisp_main(int argc, char ** argv)
                 else if (!strcmp("--no-sdl2", argv[i]))
                 {
                     load_sdl2 = 0;
+                }
+                else if (!strcmp("--args", argv[i]))
+                {
+                    bind_args = 1;
+                }
+                else if (!strcmp("--no-args", argv[i]))
+                {
+                    bind_args = 0;
                 }
                 else if (!strcmp("--show-pass", argv[i]))
                 {
@@ -84,7 +93,10 @@ static int lisp_main(int argc, char ** argv)
             }
         }
         args = nreverse(args);
-        env_def(env, QUOTE(*argv*), args);
+        if (bind_args)
+        {
+            env_def(env, QUOTE(*argv*), args);
+        }
 
         if (load_core)
         {
