@@ -421,6 +421,7 @@
 
 
 ;;functions
+;; TODO move to std/functional or std/algorithm
 (defun fun-switch-binary-params (f)
   (lambda (a b) (f b a)))
 
@@ -429,3 +430,5 @@
 
 (defun curry-2nd (f arg)
   (lambda args (apply f `(,@args ,arg))))
+
+(load-file "std/sort.lisp")
