@@ -144,14 +144,18 @@ I32 num_to_i32(Expr val)
 
 Expr u64_to_num(U64 val)
 {
-    I64 i64 = (I64) val;
+    return i64_to_num((I64) val);
+}
+
+Expr i64_to_num(I64 val)
+{
 #if CHECK_OVERFLOWS
-    if (i64 > FIXNUM_MAXVAL)
+    if (val > FIXNUM_MAXVAL)
     {
         ERROR("overflow");
     }
 #endif
-    return make_fixnum(i64);
+    return make_fixnum(val);
 }
 
 U64 num_to_u64(Expr val)
