@@ -124,6 +124,11 @@ char const * _stream_name(Stream * stream)
     return stream->name;
 }
 
+I64 _stream_offset(Stream * stream)
+{
+    return stream->offset;
+}
+
 void _stream_put_cstring(Stream * out, char const * str)
 {
     ASSERT(out);
@@ -299,11 +304,13 @@ void _stream_skip_char(Stream * in)
     case STREAM_TYPE_FILE_INPUT:
     case STREAM_TYPE_FILE_INPUT_CLOSE:
         getc(in->file);
+        ++in->offset; // TODO check for EOF?
         break;
     case STREAM_TYPE_STRING_INPUT:
         if (in->pos < in->cap)
         {
             ++in->pos;
+            ++in->offset;
         }
         break;
     default:

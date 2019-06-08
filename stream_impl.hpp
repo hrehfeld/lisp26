@@ -17,7 +17,10 @@ typedef struct
         I32 next;
     };
 
+    /* debug info */
+
     char * name; /* owned by stream, may be NULL */
+    I64 offset;
 } Stream;
 
 void _make_file_input_stream(Stream * stream, FILE * file, char const * name, Bool close_on_free);
@@ -29,6 +32,7 @@ void _make_string_output_stream(Stream * stream);
 void _free_stream(Stream * stream);
 
 char const * _stream_name(Stream * stream);
+I64 _stream_offset(Stream * stream);
 
 /* output-only */
 

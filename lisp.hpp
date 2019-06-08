@@ -667,6 +667,7 @@ void stream_show_status();
 #endif
 
 char const * stream_name(Expr exp);
+I64 stream_offset(Expr exp);
 
 void bind_stream(Expr env);
 

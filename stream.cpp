@@ -255,6 +255,11 @@ char const * stream_name(Expr exp)
     return name;
 }
 
+I64 stream_offset(Expr exp)
+{
+    return _stream_offset(stream_impl(exp));
+}
+
 static Expr b_make_file_input_stream(Expr args, Expr env, void * user)
 {
     Expr exp = nil;
@@ -321,6 +326,16 @@ static Expr b_stream_name(Expr args, Expr env, void * user)
     return make_string(name);
 }
 
+static Expr f_stream_offset(Expr stream)
+{
+    return i64_to_num(stream_offset(stream));
+}
+
+static Expr b_stream_offset(Expr args, Expr env, void * user)
+{
+    return f_stream_offset(car(args));
+}
+
 static Expr f_stream_put_string(Expr stream, Expr string)
 {
     stream_put_cstring(stream, string_value(string));
@@ -384,6 +399,7 @@ void bind_stream(Expr env)
 
     env_def(env, QUOTE(stream-close             ), make_builtin_fun(b_stream_close             , NULL));
     env_def(env, QUOTE(stream-name              ), make_builtin_fun(b_stream_name              , NULL));
+    env_def(env, QUOTE(stream-offset            ), make_builtin_fun(b_stream_offset            , NULL));
 
     env_def(env, QUOTE(stream-put-string        ), make_builtin_fun(b_stream_put_string        , NULL));
     env_def(env, QUOTE(stream-put-char          ), make_builtin_fun(b_stream_put_char          , NULL));
