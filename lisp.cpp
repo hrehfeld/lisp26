@@ -28,13 +28,19 @@ static int lisp_main(int argc, char ** argv)
         Bool load_sdl2 = 0;
 
         Bool show_pass = 0;
+        Bool show_help = 0;
 
         Expr args = nil;
         for (int i = 1; i < argc; ++i)
         {
             if (!cmd)
             {
-                if (!strcmp("--core", argv[i]))
+                if (!strcmp("--help", argv[i]) ||
+                    !strcmp("-h", argv[i]))
+                {
+                    show_help = 1;
+                }
+                else if (!strcmp("--core", argv[i]))
                 {
                     load_core = 1;
                 }
@@ -75,6 +81,11 @@ static int lisp_main(int argc, char ** argv)
                 ERROR("illegal argument: %s\n", argv[i]);
             }
         }
+        if (show_help)
+        {
+            goto usage;
+        }
+
         args = nreverse(args);
         env_def(env, QUOTE(*argv*), args);
 
@@ -90,10 +101,9 @@ static int lisp_main(int argc, char ** argv)
 
         if (!cmd)
         {
-            fprintf(stderr, "missing command\n");
-            fprintf(stderr, "usage: lisp {OPTION} (repl | load | test) {ARGUMENT}\n");
+            fprintf(stderr, "lisp: missing command\n");
             ret = 1;
-            goto done;
+            goto usage;
         }
         else if (!strcmp("repl", cmd))
         {
@@ -127,7 +137,12 @@ done:
     return ret;
 
 usage:
-    fprintf(stderr, "usage: lisp {OPTION} (repl | load | test) {ARGUMENT}\n");
+    fprintf(stderr,
+            "Usage: lisp {OPTION} (repl | load | test) {ARGUMENT}\n"
+            "  -h, --help\n"
+            "      --core\n"
+            "      --sdl2\n"
+            "      --show-pass\n");
     goto done;
 }
 
