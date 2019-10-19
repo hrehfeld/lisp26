@@ -4,6 +4,9 @@
 #endif
 
 #define NIL_IS_MACRO            1 // 1 0 1
+#define CXR_NIL_IS_NIL          1 // 1 0 1
+
+#define BYPASS_LABEL            0 // 0 0 1
 
 #define MAX_SYMBOLS            -1
 #define MAX_CONSES             -1
@@ -71,7 +74,7 @@
 #define BIND_SYMBOL             1 // 1 0 1
 #define BIND_SYSTEM             1 // 1 0 1
 #define BIND_HASH               1 // 1 0 1
-#define BIND_TYPE               0 // 0 0 1
+#define BIND_TYPE               1 // 1 0 1
 
 #define READER_QUOTE            1 // 1 0 1
 #define READER_BACKQUOTE        1 // 1 0 1
@@ -84,6 +87,7 @@
 #define PRINTER_QUOTE           1 // 1 0 1
 #define PRINTER_BACKQUOTE       ENABLE_BACKQUOTE
 #define PRINTER_UNQUOTE         ENABLE_BACKQUOTE
+#define PRINTER_UNQUOTE_SPLICE  ENABLE_BACKQUOTE
 #define PRINTER_VECTOR          ENABLE_VECTOR
 #define PRINTER_BIGNUM          0 // 0 0 1
 

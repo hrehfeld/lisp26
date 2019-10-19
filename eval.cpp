@@ -6,7 +6,13 @@
 #endif
 
 #if EVAL_STACK_MARKER
-static Expr _eval_stack = nil; // TODO GC
+Expr _eval_stack = nil;
+/* TODO GC
+
+ 1) stuff in the _eval_stack is not added to roots!
+ 2) whatever is reachable only from the eval stack bloats memory (low importance)
+
+ */
 #endif
 
 #if EVAL_STACK_MARKER
@@ -172,16 +178,37 @@ public:
                 }
 #endif
 
+                else if (is_op(exp, SYM_label))
+                {
+#if BYPASS_LABEL
+                    return eval(caddr(exp), env);
+#else
+                    // TODO this is a bit drastic
+                    Expr const name = cadr(exp);
+                    Expr const sub = caddr(exp);
+                    if (is_lambda(sub))
+                    {
+                        return eval_lambda(sub, env, name);
+                    }
+                    else if (is_syntax(sub))
+                    {
+                        return eval_syntax(sub, env, name);
+                    }
+                    else
+                    {
+                        return ERROR("label expressions may only be used with lambda or syntax");
+                    }
+#endif
+                }
+
                 else if (is_lambda(exp))
                 {
-                    Expr const name = nil; // TODO
-                    return eval_lambda(exp, env, name);
+                    return eval_lambda(exp, env, nil);
                 }
 
                 else if (is_syntax(exp))
                 {
-                    Expr const name = nil; // TODO
-                    return eval_syntax(exp, env, name);
+                    return eval_syntax(exp, env, nil);
                 }
 
 #if EVAL_ENV
@@ -388,11 +415,11 @@ public:
         }
         else if (is_builtin_fun(op))
         {
-            return builtin_apply(op)(vals, env, NULL);
+            return builtin_apply(op)(vals, env, builtin_user(op));
         }
         else if (is_builtin_mac(op))
         {
-            return builtin_apply(op)(vals, env, NULL);
+            return builtin_apply(op)(vals, env, builtin_user(op));
         }
         else
         {
@@ -434,6 +461,13 @@ protected:
 
 #if ENABLE_FIXNUM
         if (is_fixnum(exp))
+        {
+            return 1;
+        }
+#endif
+
+#if ENABLE_FLOAT
+        if (is_float(exp))
         {
             return 1;
         }
@@ -604,11 +638,6 @@ protected:
 
 #if ENABLE_BACKQUOTE
 
-    inline Bool is_unquote_splicing(Expr exp)
-    {
-        return is_op(exp, SYM_unquote_splicing);
-    }
-
     /* awfully recursive, hacky implementation */
     Expr backquote_list(Expr seq, Expr env)
     {
@@ -708,9 +737,7 @@ protected:
 
     Expr eval_lambda(Expr exp, Expr env, Expr name)
     {
-        Expr const params = cadr(exp);
-        Expr const body   = cddr(exp);
-        return make_function(env, params, body, name);
+        return make_function_from_lambda(env, exp, name);
     }
 
 /* syntax *********/
@@ -722,9 +749,7 @@ protected:
 
     Expr eval_syntax(Expr exp, Expr env, Expr name)
     {
-        Expr const params = cadr(exp);
-        Expr const body   = cddr(exp);
-        return make_macro(env, params, body, name);
+        return make_macro_from_syntax(env, exp, name);
     }
 
 /* env-* *********/
@@ -991,10 +1016,7 @@ protected:
 
     Expr eval_defun(Expr exp, Expr env)
     {
-        Expr const name   = cadr(exp);
-        Expr const params = caddr(exp);
-        Expr const body   = cdddr(exp);
-        env_def(env, name, make_function(env, params, body, nil));
+        env_def(env, name, make_function_from_defun(env, exp));
         return nil;
     }
 

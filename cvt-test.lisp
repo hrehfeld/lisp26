@@ -6,7 +6,8 @@
 (defun named-op? (exp name)
   (and (cons? exp) (eq (car exp) name)))
 
-(defparameter ifn nil) ; "/Users/thor/Documents/Cloned/hrehfeld-lisp-py/tests.lisp"
+;;(defparameter ifn nil)
+(defparameter ifn "/Users/thor/Documents/Cloned/hrehfeld-lisp-py/tests.lisp")
 
 (dolist (arg *argv*)
   (= ifn arg))
@@ -26,4 +27,5 @@
         (= src (cadr src)))
       (when (named-op? exp 'quote)
         (= exp (cadr exp)))
-      (println (list src `=> exp)))))
+      (print (list src `=> exp))
+      (println "comment" test))))

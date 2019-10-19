@@ -96,12 +96,12 @@ void system_bind_core(Expr env)
 {
     if (!read_stream)
     {
-        read_stream = make_file_input_stream(stdin, 0);
+        read_stream = make_file_input_stream(stdin, "<stdin>", 0);
     }
 
     if (!print_stream)
     {
-        print_stream = make_file_output_stream(stdout, 0);
+        print_stream = make_file_output_stream(stdout, "<stdout>", 0);
     }
 
 #if ENABLE_SPECIAL

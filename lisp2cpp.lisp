@@ -1,26 +1,98 @@
+;; -*- compile-command: "./lisp load lisp2cpp.lisp tests/programs/comp-arith.lisp > comp-arith.lisp" -*-
 
 (load-file "lisp2x.lisp")
 
 (defconstant +show-comment+ nil)
 
+(defun split-file (exps)
+  (binary-classify defun? exps))
+
+(defun compile-expr (exp env)
+  (let ((r '())))
+  (cond
+   ((symbol? exp)
+    ;;TODO: check if exists
+    (render-name exp))
+
+    ((fixnum? exp)
+     (str exp))
+
+    ((cons? exp)
+     (cond
+       ((coerce? exp)
+        (render-coerce exp env ctx))
+
+       ((if? exp)
+        (+ (render-expr (cadr exp) env exp)
+           " ? "
+           (render-expr (caddr exp) env exp)
+           " : "
+           (render-expr (cadddr exp) env exp)))
+
+       ((any-named-op? exp
+                       '+= '^= '>> '<<
+                       '+ '- '* '/ '< '>)
+        (let* ((use-parens (< (prec exp) (prec ctx)))
+               (pl (if use-parens "(" ""))
+               (pr (if use-parens ")" "")))
+          (+ pl (join
+                 (+ " " (render-expr (car exp) env exp) " ")
+                 (map (lambda (x) (render-expr x env exp)) (cdr exp)))
+             pr)))
+       (t
+        (render-call exp env ctx))))
+
+    (t
+     (error "cannot compile expr " exp)))
+  )
+
+(defun any-let? (exp) (any-named-op? exp 'let* 'let))
+
+(defun compile-assign-env (exp env)
+  (let* ((recurse (curry  (fun-switch-binary-params compile-assign-env) env))
+         (recurse-list (curry map recurse)))
+    (cond ((any-let? exp)
+           (let (((let-sym let-decls . let-body) exp))
+             `(,let-sym ,(make-env env) ,let-decls ,@(recurse-list let-body))))
+          (t exp))))
+
+(defun compile-unassign-env (exp)
+  (cond ((any-let? exp)
+         (let (((let-sym _env let-decls . let-body) exp))
+           `(,let-sym ,let-decls ,@(map compile-unassign-env let-body))))
+        (t exp)))
+
+;; (defun compile-assign-envs (exprs env)
+;;   (map compile-assign-env exprs))
+
+(defun compile-file (exps env)
+  (let (((exps . main-body) (split-file exps)))
+    (println exps)
+    (println main-body)
+    (map compile-unassign-env
+         (let ((main-body (map (curry-2nd compile-assign-env env) main-body)))
+           (println main-body)
+           `(defun main () ,@main-body)))))
+
+
 (defun render-file (exps env)
   (let ((ret '())
-        (1st t))
+          (1st t))
 
-    ;;(println 'env env)
-    (if exps (push "" ret))
+      ;;(println 'env env)
+      ;; emit empty line
+      (if exps (push "" ret))
 
-    (dolist (exp exps)
-      (if 1st
-          (= 1st nil)
+      (dolist (exp exps)
+        (if 1st
+            (= 1st nil)
           (unless (equal "" (car ret))
             (push "" ret))) ;; TODO filter defmacro calls before calling this (multi-pass architecture)
-      (when +show-comment+
-        (push (+ "// " (repr exp)) ret))
-      (dolist (line (render-stmt exp env nil))
-        (push line ret)))
+        (when +show-comment+
+          (push (+ "// " (repr exp)) ret))
+        (= ret (append (nreverse (render-stmt exp env nil)) ret)))
 
-    (nreverse ret)))
+      (nreverse ret)))
 
 ;;; stmt
 
@@ -48,14 +120,21 @@
       (= ret (append ret (render-stmt stmt env exp)))) ;; TODO this is hopelessly slow
     ret))
 
+(defun declare-type-parse (type-map (type . names))
+  (dolist (name names)
+    (env-bind type-map name type)))
+
 (defun strip-declarations (body type-map)
-  (if body
-      (if (declare? (car body))
-          (let (((_ type . names) (car body)))
-            (dolist (name names)
-              (env-bind type-map name type))
-            (strip-declarations (cdr body) type-map))
-          body)))
+  (when body
+    (if (declare? (car body))
+        ;; TODO: support more declares
+        (let (((_decl-sym . decls) (car body)))
+          (dolist ((decl-kind . decl-args) decls)
+            (cond ((== decl-kind 'type)
+                   (declare-type-parse type-map decl-args))
+                  (t (error "unsupported declare kind"))))
+          (strip-declarations (cdr body) type-map))
+      body)))
 
 (defun render-defun (exp env ctx)
   ;;(println '// 'DEFUN)
@@ -115,7 +194,7 @@
      -1)))
 
 (defun render-expr (exp env ctx)
-  ;;(println '// 'EXPR)
+  (println '// 'EXPR exp)
   (cond
     ((symbol? exp)
      (render-name exp))
@@ -137,14 +216,14 @@
 
        ((any-named-op? exp
                        '+= '^= '>> '<<
-                       + '- '* '/ '< '>)
-        (let ((pl "")
-              (pr ""))
-          (when (< (prec exp) (prec ctx))
-            (= pl "(")
-            (= pr ")"))
-          (+ pl (join (+ " " (render-expr (car exp) env exp) " ") (map (lambda (x) (render-expr x env exp)) (cdr exp))) pr)))
-
+                       '+ '- '* '/ '< '>)
+        (let* ((use-parens (< (prec exp) (prec ctx)))
+               (pl (if use-parens "(" ""))
+               (pr (if use-parens ")" "")))
+          (+ pl (join
+                 (+ " " (render-expr (car exp) env exp) " ")
+                 (map (lambda (x) (render-expr x env exp)) (cdr exp)))
+             pr)))
        (t
         (render-call exp env ctx))))
 
@@ -184,4 +263,8 @@
   (symbol-name exp))
 
 (dolist (arg *argv*)
-  (emit-tree (render-file (read-file arg) (make-env nil))))
+  (let ((exps (read-file arg)))
+    (let ((exps (compile-file exps (make-env))))
+      (println exps)
+      ;(emit-tree (render-file  (make-env nil)))
+      )))

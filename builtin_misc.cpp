@@ -182,7 +182,7 @@ Expr b_gensym(Expr args, Expr env, void * user)
         return ERROR("illegal arguments");
     }
 
-    return f_gensym(&g_sys.gensym);
+    return make_gensym(&g_sys.gensym);
 }
 
 #endif

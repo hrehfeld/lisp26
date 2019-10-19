@@ -120,6 +120,10 @@ typedef struct
 #define DATA_BITS (U64VAL(64) - TYPE_BITS)
 #define DATA_MASK ((U64VAL(1) << DATA_BITS) - U64VAL(1))
 
+// NOTE when adding new types, you have to also add them to:
+// - f_type
+// - print
+
 enum /* TODO proper ordering? */
 {
     TYPE_NIL = 0,
@@ -211,11 +215,6 @@ inline static Bool is_nil(Expr exp)
 
 #endif
 
-inline static Bool eq(Expr a, Expr b)
-{
-    return expr_bits(a) == expr_bits(b);
-}
-
 #else
 
 Expr make_expr(U64 type, U64 data);
@@ -226,21 +225,22 @@ U64 expr_data(Expr exp);
 Bool is_nil(Expr exp);
 #endif
 
+#endif
+
 inline static Bool eq(Expr a, Expr b)
 {
-	//TODO why is this in the define and different than above version?
-    return a == b;
+    return expr_bits(a) == expr_bits(b);
 }
 
-#endif
 
 /* symbol *****/
 
 #if SYMBOL_CACHE
 
-// TODO: why not this?
-//#define SYM_CONST(data)      MAKE_EXPR(TYPE_SYMBOL, U64VAL(data))
-#define SYM_CONST(data)      data##03
+#define SYM_CONST(data)      MAKE_EXPR(TYPE_SYMBOL, U64VAL(data))
+/* TODO: if the above fails, we need some variant of this
+   but keep in mind that this doesn't reflect ifdefs and TYPE_ defs */
+/* #define SYM_CONST(data)      data##03 */
 
 #define SYM_DOT              SYM_CONST(0x00)
 #define SYM_ERROR            SYM_CONST(0x01)
@@ -278,6 +278,7 @@ inline static Bool eq(Expr a, Expr b)
 #define SYM_unwind_protect   SYM_CONST(0x1f)
 #define SYM_while            SYM_CONST(0x20)
 #define SYM_macroexpand_1    SYM_CONST(0x21)
+#define SYM_label            SYM_CONST(0x22)
 
 #else
 
@@ -317,6 +318,7 @@ inline static Bool eq(Expr a, Expr b)
 #define SYM_unwind_protect   QUOTE(unwind-protect)
 #define SYM_while            QUOTE(while)
 #define SYM_macroexpand_1    QUOTE(macroexpand-1)
+#define SYM_label            QUOTE(label)
 
 #endif
 
@@ -331,21 +333,20 @@ inline static Bool eq(Expr a, Expr b)
 #define SYM_equal            QUOTE(equal)
 #define SYM_gensym           QUOTE(gensym)
 
-//TODO rename to Symbols
-struct Symbol
+typedef struct
 {
     U64 num;
     U64 max;
-	//TODO: r/w? read write?
+    // TODO: rename to read write
     char ** names_r;
     char ** names_w;
 #if SYMBOL_CACHE
     U64 ncached;
 #endif
-};
+} SymbolState;
 
-void symbol_init(Symbol * symbol);
-void symbol_quit(Symbol * symbol);
+void symbol_init(SymbolState * symbol);
+void symbol_quit(SymbolState * symbol);
 void symbol_gc(U64 num_roots, Expr ** roots);
 
 //TODO: inline
@@ -402,6 +403,8 @@ inline static Expr cdddr(Expr exp) { return cdr(cdr(cdr(exp))); }
 
 inline static Expr cadddr(Expr exp) { return car(cdr(cdr(cdr(exp)))); }
 
+inline static Expr caddddr(Expr exp) { return car(cdr(cdr(cdr(cdr(exp))))); }
+
 Expr make_cons(Expr a, Expr b);
 
 void set_car(Expr exp, Expr val);
@@ -414,23 +417,16 @@ Expr f_cdr(Expr exp);
 
 #if ENABLE_GENSYM
 
-//TODO: Gensyms
-struct Gensym
+struct GensymState
 {
     U64 counter;
 };
 
-void gensym_init(Gensym * gensym);
+void gensym_init(GensymState * gensym);
 void gensym_quit();
 
 Bool is_gensym(Expr exp);
-Expr make_gensym(Gensym * gensym);
-
-//TODO: what is this?
-inline static Expr f_gensym(Gensym * gensym)
-{
-    return make_gensym(gensym);
-}
+Expr make_gensym(GensymState * gensym);
 
 void p_gensym(PrintFun rec, Expr out, Expr exp);
 
@@ -464,6 +460,7 @@ Bool fixnum_maybe_add(Expr a, Expr b, Expr * out);
 Bool fixnum_maybe_sub(Expr a, Expr b, Expr * out);
 Bool fixnum_maybe_mul(Expr a, Expr b, Expr * out);
 
+Expr fixnum_neg(Expr a);
 Expr fixnum_add(Expr a, Expr b);
 Expr fixnum_sub(Expr a, Expr b);
 Expr fixnum_mul(Expr a, Expr b);
@@ -528,6 +525,9 @@ void p_float(PrintFun rec, Expr out, Expr exp);
 Expr make_number(I64 value);
 I64 number_value(Expr exp);
 
+Bool number_equal(Expr a, Expr b);
+
+Expr number_neg(Expr a);
 Expr number_add(Expr a, Expr b);
 Expr number_sub(Expr a, Expr b);
 Expr number_mul(Expr a, Expr b);
@@ -584,7 +584,13 @@ void bind_vector(Expr env);
 
 #endif
 
-/* builtin -- functions defined in c / natively ****/
+/* builtin ****/
+/* all b_* functions have the same signature: ApplyFun 
+   builtins are functions usually called from within eval that require the current env
+   first argument args is the list of args
+                  env is the current environment
+                  user state supplied at creation time that will be available for every call
+ */
 
 Bool is_builtin_fun(Expr exp);
 Bool is_builtin_mac(Expr exp);
@@ -600,10 +606,7 @@ void * builtin_user(Expr exp);
 Bool unpack_all_args(Expr args, char const * fmt, ...);
 int unpack_args(Expr args, char const * fmt, ...);
 
-/* all b_* functions have the same signature: ApplyFun */
-//TODO: we still need doc on what the actual in-language signatures are
-
-//TODO: use typedef for ApplyFun function?
+//TODO: use macro so signature is not repeated
 Expr b_eq(Expr args, Expr env, void * user);
 Expr b_equal(Expr args, Expr env, void * user);
 
@@ -629,11 +632,11 @@ Expr b_coerce(Expr args, Expr env, void * user);
 
 Bool is_stream(Expr exp);
 
-Expr make_file_input_stream(FILE * file, Bool close_on_free);
+Expr make_file_input_stream(FILE * file, char const * name, Bool close_on_free);
 Expr make_file_input_stream_from_path(char const * ifn);
 
-Expr make_file_output_stream(FILE * file, Bool close_on_free);
-Expr make_file_output_stream_from_path(char const * ifn);
+Expr make_file_output_stream(FILE * file, char const * name, Bool close_on_free);
+Expr make_file_output_stream_from_path(char const * ofn);
 
 Expr make_string_input_stream(char const * str);
 Expr make_string_output_stream();
@@ -663,6 +666,9 @@ void stream_show_status();
 
 #endif
 
+char const * stream_name(Expr exp);
+I64 stream_offset(Expr exp);
+
 void bind_stream(Expr env);
 
 /* list *******/
@@ -672,6 +678,7 @@ Expr list(Expr exp1);
 Expr list(Expr exp1, Expr exp2);
 Expr list(Expr exp1, Expr exp2, Expr exp3);
 Expr list(Expr exp1, Expr exp2, Expr exp3, Expr exp4);
+Expr list(Expr exp1, Expr exp2, Expr exp3, Expr exp4, Expr exp5);
 
 U64 list_length(Expr exp);
 
@@ -682,7 +689,9 @@ Expr append(Expr a, Expr b);
 Expr nreverse(Expr list);
 Expr assoc(Expr item, Expr list);
 
-/* closure ****/
+/* closure
+   functions/macros defined in lisp that save surrounding env
+****/
 
 void closure_init();
 void closure_quit();
@@ -692,14 +701,20 @@ Bool is_closure(Expr exp);
 Expr closure_env(Expr closure);
 Expr closure_params(Expr closure);
 Expr closure_body(Expr closure);
+Expr closure_name(Expr closure);
+
+/* function/macro name may be nil for lambda/syntax forms */
 
 Bool is_function(Expr exp);
-Expr make_function(Expr env, Expr params, Expr body, Expr name);  /* name can be nil */
+Expr make_function(Expr env, Expr params, Expr body, Expr name);
+Expr make_function_from_lambda(Expr env, Expr exp, Expr name);
+Expr make_function_from_defun(Expr env, Expr exp);
 
 void p_function(PrintFun rec, Expr out, Expr exp);
 
 Bool is_macro(Expr exp);
 Expr make_macro(Expr env, Expr params, Expr body, Expr name);
+Expr make_macro_from_syntax(Expr env, Expr exp, Expr name);
 
 void p_macro(PrintFun rec, Expr out, Expr exp);
 
@@ -712,13 +727,13 @@ Expr make_env(Expr outer);
 Expr env_vars(Expr env);
 
 /* local */
-void env_def(Expr env, Expr var, Expr val);
+Expr env_def(Expr env, Expr var, Expr val);
 void env_del(Expr env, Expr var);
 Bool env_owns(Expr env, Expr var);
 
 /* global */
 Bool env_has(Expr env, Expr var);
-void env_set(Expr env, Expr var, Expr val);
+Expr env_set(Expr env, Expr var, Expr val);
 
 Expr env_lookup(Expr env, Expr var);
 Bool env_maybe_lookup(Expr env, Expr var, Expr * val);
@@ -729,22 +744,20 @@ void env_alias(Expr env, Expr var, Expr otr)
     env_def(env, var, env_lookup(env, otr));
 }
 
+/*
+TODO note that you can do stuff like this, so might as well return NIL
+
+if (Expr const foo = env_get(...))
+{
+    printf("%d\n", i);
+}
+*/
 inline static
 Expr env_get(Expr env, Expr var)
 {
     return env_lookup(env, var);
 }
 
-/*
-
-TODO note that you can do stuff like this, so might as well return NIL
-
-if (int const i = 42)
-{
-    printf("%d\n", i);
-}
-
-*/
 
 Expr env_outer(Expr env);
 Expr env_outermost(Expr env);
@@ -810,7 +823,11 @@ Expr make_error(char const * file, int line, char const * fmt, ...);
 void show_backtrace();
 void show_error_context();
 
-/* hash *******/
+/* hash
+   
+   hash functions for expressions
+
+*******/
 
 #if ENABLE_HASH
 
@@ -819,6 +836,8 @@ Expr eq_hash(Expr exp);
 
 void hash_init();
 void hash_quit();
+
+/* hash => CL hash maps */
 
 Bool is_hash(Expr exp);
 Expr make_hash();
@@ -829,11 +848,14 @@ Bool hash_has(Expr hash, Expr key);
 Expr hash_get(Expr hash, Expr key);
 void hash_put(Expr hash, Expr key, Expr val);
 
+/** bind builtins */
 void hash_bind(Expr env);
 
 #endif
 
-/* coerce *****/
+/* coerce 
+   between C and lisp types
+*****/
 
 /* x_as_y -> reinterprets/truncates */
 /* x_to_y -> may throw errors */
@@ -861,7 +883,8 @@ U32  num_to_u32(Expr val);
 Expr u64_to_num(U64 val);
 U64  num_to_u64(Expr val);
 
-U64  num_to_i64(Expr val);
+Expr i64_to_num(I64 val);
+I64  num_to_i64(Expr val);
 
 Expr size_to_num(size_t val);
 size_t num_to_size(Expr val);
@@ -874,9 +897,11 @@ Expr f_coerce(Expr exp, Expr type);
  - always return an Expr (possibly NIL)
  - only have Expr arguments
  - don't take varargs (TODO?)
-*/
 
-Bool is_tagged(Expr exp, Expr tag);
+ internal utility functions
+ follow "lisp calling conventions" (only exprs in signature)
+ implemented natively for performance reasons, but could be implemented in lisp for bootstrapping
+*/
 
 inline static Bool is_op(Expr exp, Expr sym)
 {
@@ -898,6 +923,11 @@ inline static Bool is_backquote(Expr exp)
 inline static Bool is_unquote(Expr exp)
 {
     return is_op(exp, SYM_unquote);
+}
+
+inline static Bool is_unquote_splicing(Expr exp)
+{
+    return is_op(exp, SYM_unquote_splicing);
 }
 
 #endif
@@ -936,7 +966,10 @@ Expr f_read_file(Expr ifn);
 
 Expr f_escape(Expr str);
 
-/* hash_impl **/
+/* hash_impl 
+   
+   hash set implementation for internal interpreter use
+**/
 
 void make_hash_set(HashSetU64 * set);
 void free_hash_set(HashSetU64 * set);
@@ -953,7 +986,11 @@ void show_set(HashSetU64 const * set);
 U64 hash_u64(U64 value);
 U64 hash_str(char const * str);
 
-/* spooky *****/
+/* spooky
+
+   just hash function helpers
+
+ *****/
 
 U32 spooky_hash32(size_t length, void const * message, U32 seed);
 U64 spooky_hash64(size_t length, void const * message, U64 seed);
@@ -962,6 +999,9 @@ U64 spooky_hash64(size_t length, void const * message, U64 seed);
 
 F64 get_time();
 
+/*
+  time until out of scope
+*/
 class Profiler
 {
 public:
@@ -991,18 +1031,24 @@ private:
     F64 t0;
 };
 
-/* meta *******/
+/* meta
+   bind interpreter internals
 
+*******/
 void meta_install(Expr env);
 
-/* system *****/
+/* system
+
+global state
+
+*****/
 
 struct System
 {
-    Symbol symbol;
+    SymbolState symbol;
     ConsBuffer cons;
 #if ENABLE_GENSYM
-    Gensym gensym;
+    GensymState gensym;
 #endif
 };
 

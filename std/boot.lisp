@@ -18,13 +18,25 @@
             `(def ,name
                  (syntax ,args ,@body))))
 
+;; add a label to definitions
+(def defmacro
+    (label 'defmacro (syntax (name args . body)
+                       `(def ,name
+                            (label ,name (syntax ,args ,@body))))))
+
 ;; TODO analyze defun body for returns and maybe skip block
 
+;; 1. plain lambda
 (defmacro defun (name args . body)
   `(def ,name (lambda ,args ,@body)))
 
+;; 2. body wrapped in block
 (defmacro defun (name args . body)
   `(def ,name (lambda ,args (block nil ,@body))))
+
+;; 3. with block and label
+(defmacro defun (name args . body)
+  `(def ,name (label ,name (lambda ,args (block nil ,@body)))))
 
 (defun std:env-outermost (env)
   (if env

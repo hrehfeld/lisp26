@@ -393,30 +393,35 @@ static inline Expr do_parse_expr(Expr in, Expr tok)
 #if READER_USE_NUMBER
             Expr val = make_number(0);
             Expr ten = make_number(10);
-            if (neg)
+            Expr one = make_number(1);
+            Expr den = one;
+
+            // TODO extract function: parse_int
+            while (1)
             {
-                while (1)
+                char const ch = peek(in);
+                if (!is_number_part(ch))
                 {
-                    char const ch = peek(in);
-                    if (ch < '0' || ch > '9')
-                    {
-                        break;
-                    }
-
-                    I64 const digit = ch - '0';
-
-                    val = number_mul(val, ten);
-                    val = number_sub(val, make_number(digit));
-
-                    write(tok, consume(in));
+                    break;
                 }
+
+                I64 const digit = ch - '0';
+
+                val = number_mul(val, ten);
+                val = number_add(val, make_number(digit));
+
+                write(tok, consume(in));
             }
-            else
+
+
+            if (peek(in) == '.')
             {
+                write(tok, consume(in));
+
                 while (1)
                 {
                     char const ch = peek(in);
-                    if (ch < '0' || ch > '9')
+                    if (!is_number_part(ch))
                     {
                         break;
                     }
@@ -425,14 +430,25 @@ static inline Expr do_parse_expr(Expr in, Expr tok)
 
                     val = number_mul(val, ten);
                     val = number_add(val, make_number(digit));
+                    den = number_mul(den, ten);
 
                     write(tok, consume(in));
                 }
             }
 
+            if (neg)
+            {
+                val = number_neg(val);
+            }
+
             if (!is_number_stop(peek(in)))
             {
                 goto symbol_loop;
+            }
+
+            if (!number_equal(den, one))
+            {
+                val = number_div(val, den);
             }
 
             return val;
@@ -580,7 +596,7 @@ Expr read_with_env(Expr env)
     else
     {
         // TODO make a proper prompt input stream
-        Expr in = make_file_input_stream(stdin, 0);
+        Expr in = make_file_input_stream(stdin, NULL, 0);
         Expr ret = read_from_stream(in);
         stream_close(in);
         return ret;

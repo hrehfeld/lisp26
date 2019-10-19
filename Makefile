@@ -1,8 +1,48 @@
 
+DEBUG = 0
+
+CXX = g++
+CXXFLAGS = -std=c++11 -Wall -Wextra -Wno-implicit-fallthrough -Wno-unused-parameter -Wpedantic
+# if we need to disable some more useless ones from extra
+# -Wno-clobbered
+# -Wno-cast-function-type
+# -Wno-deprecated-copy (C++ only)
+# -Wno-empty-body
+# -Wno-ignored-qualifiers
+# -Wno-missing-field-initializers
+# -Wno-missing-parameter-type (C only)
+# -Wno-old-style-declaration (C only)
+# -Wno-override-init
+# -Wno-sign-compare (C only)
+# -Wno-redundant-move (only for C++)
+# -Wno-type-limits
+# -Wno-uninitialized
+# -Wno-shift-negative-value (in C++03 and in C99 and newer)
+# -Wno-unused-but-set-parameter (only with -Wunused or -Wall)
+LDFLAGS = -Wall
+LDLIBS = -lSDL2
+
+ifeq ($(DEBUG), 1)
+CXXFLAGS += -g
+#CXXFLAGS += -rdynamic # TODO doesn't work with apple clang "g++"
+CXXFLAGS += -O0
+LDFLAGS += -O0
+else
+CXXFLAGS += -O2
+LDFLAGS += -O2
+endif
+
 BIN = lisp lide
 MOD = bignum builtin builtin_misc closure coerce cons cons_bind cons_impl core env env_install env_test error eval expr fixnum float gensym hash hash_bind hash_impl list meta number pointer printer reader reader_bind reader_test sdl2 spooky stream stream_impl string symbol system test time util vector
 OBJ = $(MOD:%=%.o)
 CPP = $(MOD:%=%.cpp)
+
+PROG_LISP = $(wildcard tests/programs/*.lisp)
+#PROG_PY   = $(PROG_LISP:%.lisp=%.py)
+PROG_PY = tests/programs/hello.py tests/programs/blub.py
+#PROG_CPP  = $(PROG_LISP:%.lisp=%.cpp)
+PROG_CPP = tests/programs/hello.cpp tests/programs/blah.cpp tests/programs/comp.cpp
+PROG_BIN  = $(PROG_CPP:%.cpp=%)
 
 RUNTIME = runtime.hpp lisp.hpp config.hpp font.hpp
 
@@ -17,14 +57,18 @@ e: extra
 d: default-config
 r: random-config
 
-extra: hello blah comp blub.py render.cpp build.py
+extra: $(PROG_BIN) $(PROG_PY)
 
-tests: lisp std.lisp std.test
+# TODO add std/*.lisp files as dependencies
+tests: lisp std.lisp std.test std/sort.test
 	./lisp test
 	./lisp test core.test
+	./lisp test env.test
 	./lisp test std.lisp std.test
+	./lisp test std.lisp std/sort.test
 	./lisp test meta.lisp meta.test
 	./lisp test hash.lisp hash.test
+	./lisp test env.lisp env.test
 
 default-config:
 	python3 fuzz.py default
@@ -33,43 +77,31 @@ random-config:
 	python3 fuzz.py random
 
 %.o: %.cpp lisp.hpp config.hpp
-	g++ -c -std=c++11 -Wall -O2 $< -o $@
+	$(CXX) -c $(CXXFLAGS) $< -o $@
 
 stream.o: stream.cpp lisp.hpp config.hpp stream_impl.hpp
-	g++ -c -std=c++11 -Wall -O2 $< -o $@
 
 stream_impl.o: stream_impl.cpp lisp.hpp config.hpp stream_impl.hpp
-	g++ -c -std=c++11 -Wall -O2 $< -o $@
 
 lisp: $(OBJ) lisp.o
-	g++ -Wall -O2 $^ -lSDL2 -o $@
+	$(CXX) $(LDFLAGS) $^ $(LDLIBS) -o $@
 
 lide: lide.cpp $(RUNTIME)
-	g++ -std=c++11 -Wall -O2 $< -lSDL2 -o $@
+	$(CXX) $(CXXFLAGS) $< $(LDLIBS) -o $@
 
-hello.cpp: hello.lisp comp.lisp std.lisp lisp
-	./lisp load comp.lisp < $< > $@
-
-hello: hello.cpp $(RUNTIME)
-	g++ -std=c++11 -Wall -O2 $< -lSDL2 -o $@
-
-comp.cpp: comp.lisp std.lisp lisp
-	./lisp load comp.lisp < $< > $@
-
-comp: comp.cpp $(RUNTIME)
-	g++ -std=c++11 -Wall -O2 $< -lSDL2 -o $@
-
-blah.cpp: blah.lisp comp.lisp std.lisp lisp
-	./lisp load comp.lisp < $< > $@
-
-blah: blah.cpp $(RUNTIME)
-	g++ -std=c++11 -Wall -O2 $< -lSDL2 -o $@
-
-%.py: %.lisp lisp2py.lisp lisp2x.lisp std.lisp lisp
+tests/programs/%.py: tests/programs/%.lisp lisp2py.lisp lisp2x.lisp std.lisp lisp
 	./lisp load lisp2py.lisp --no-comments $< > $@
 
-render.cpp: render.lisp lisp2cpp.lisp lisp2x.lisp std.lisp lisp
+tests/programs/%.cpp: tests/programs/%.lisp lisp2cpp.lisp lisp2x.lisp std.lisp lisp
 	./lisp load lisp2cpp.lisp $< > $@
+
+# TODO merge comp into lisp2cpp and add --with-stub option to add main and runtime include
+tests/programs/hello.cpp: tests/programs/hello.lisp comp.lisp
+	./lisp load comp.lisp < $< > $@
+
+tests/programs/%: CXXFLAGS += -I.
+tests/programs/%: tests/programs/%.cpp $(RUNTIME)
+	$(CXX) $(CXXFLAGS) $< $(LDLIBS) -o $@
 
 # TODO
 

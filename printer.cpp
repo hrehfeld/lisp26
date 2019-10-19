@@ -128,6 +128,15 @@ static void print_helper(System * sys, Expr out, Expr exp)
     }
 #endif
 
+#if PRINTER_UNQUOTE_SPLICE
+    else if (is_unquote_splicing(exp))
+    {
+        stream_put_char(out, ',');
+        stream_put_char(out, '@');
+        print_helper(sys, out, cadr(exp));
+    }
+#endif
+
     else if (is_string(exp))
     {
         p_string(print_helper, out, exp);
@@ -154,17 +163,26 @@ static void print_helper(System * sys, Expr out, Expr exp)
 
     else if (is_builtin_fun(exp))
     {
+        // TODO add names if available
         stream_put_cstring(out, "#:<core function>");
     }
 
     else if (is_builtin_mac(exp))
     {
+        // TODO add names if available
         stream_put_cstring(out, "#:<core macro>");
     }
 
     else if (is_stream(exp))
     {
-        stream_put_cstring(out, "#:<stream>");
+        char const * name = stream_name(exp);
+        stream_put_cstring(out, "#:<stream");
+        if (name)
+        {
+            stream_put_cstring(out, " ");
+            stream_put_cstring(out, name);
+        }
+        stream_put_cstring(out, ">");
     }
 
 #if PRINTER_VECTOR
@@ -268,20 +286,30 @@ char const * repr(Expr exp)
     return string_value(repr_as_expr(exp));
 }
 
-void print(Expr exp)
+void sys_print(System * sys, Expr exp)
 {
-    Expr stream = make_file_output_stream(PRINT_FILE, 0);
+    Expr stream = make_file_output_stream(PRINT_FILE, NULL, 0); /* TODO make a function return the print stream */
     clear_marks();
     print_to_stream(stream, exp);
     stream_close(stream);
 }
 
-void println(Expr exp)
+void sys_println(System * sys, Expr exp)
 {
-    Expr stream = make_file_output_stream(PRINT_FILE, 0);
+    Expr stream = make_file_output_stream(PRINT_FILE, NULL, 0); /* TODO make a function return the print stream */
     clear_marks();
     println_to_stream(stream, exp);
     stream_close(stream);
+}
+
+void print(Expr exp)
+{
+    sys_print(&g_sys, exp);
+}
+
+void println(Expr exp)
+{
+    sys_println(&g_sys, exp);
 }
 
 void print_with_env(Expr exp, Expr env)
@@ -468,7 +496,7 @@ static Expr format_with_args(Expr out, Expr fmt, Expr args)
     {
         /* TODO unwind-protect stream_close */
         /* TODO respect *print-stream* */
-        out = make_file_output_stream(PRINT_FILE, 0);
+        out = make_file_output_stream(PRINT_FILE, NULL, 0);
         format_to_stream(out, fmt, args);
         stream_close(out);
         return nil;

@@ -31,13 +31,11 @@ static Expr fun_env_def(Expr args, Expr env, void * user)
 
     if (nargs == 2)
     {
-        env_def(env, arg1, arg2);
-        return nil;
+        return env_def(env, arg1, arg2);
     }
     else if (nargs == 3)
     {
-        env_def(arg1, arg2, arg3);
-        return nil;
+        return env_def(arg1, arg2, arg3);
     }
     else
     {
@@ -97,13 +95,11 @@ static Expr fun_env_set(Expr args, Expr env, void * user)
 
     if (nargs == 2)
     {
-        env_set(env, arg1, arg2);
-        return nil;
+        return env_set(env, arg1, arg2);
     }
     else if (nargs == 3)
     {
-        env_set(arg1, arg2, arg3);
-        return nil;
+        return env_set(arg1, arg2, arg3);
     }
     else
     {
@@ -120,13 +116,11 @@ static Expr fun_env_lookup(Expr args, Expr env, void * user)
 
     if (nargs == 1)
     {
-        env_lookup(env, arg1);
-        return nil;
+        return env_lookup(env, arg1);
     }
     else if (nargs == 2)
     {
-        env_lookup(arg1, arg2);
-        return nil;
+        return env_lookup(arg1, arg2);
     }
     else
     {

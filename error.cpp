@@ -85,6 +85,23 @@ void show_backtrace()
         }
     }
 #endif
+#if EVAL_STACK_MARKER
+    extern Expr _eval_stack;
+    //fprintf(ERROR_FILE, "EVAL STACK: %s", repr(_eval_stack));
+    if (_eval_stack)
+    {
+        fprintf(ERROR_FILE, "EVAL STACK:\n");
+        for (Expr it = _eval_stack; it; it = cdr(it))
+        {
+            // TODO need to collect names for better output than e.g.
+            // - #:<core function>
+            // - #:<lisp macro>
+            // - #:<lisp function>
+            Expr const op = car(it);
+            fprintf(ERROR_FILE, "- %s\n", repr(op));
+        }
+    }
+#endif
 }
 
 void show_error_context()

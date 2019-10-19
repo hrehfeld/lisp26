@@ -25,7 +25,7 @@
 
 ((type #(1 2 3))   => vector)
 
-((type cons) => builtin)
+((type cons) => builtin-fun)
 
 ((type *read-stream*) => stream)
 
@@ -39,6 +39,17 @@
    => 1)
 
 ((let () 123 456) => 456)
+
+;;; let*
+
+;; TODO these are actually tests for backquote/unquote/unquote-splicing
+
+((let* ((foo 3)) `,foo) => 3)
+((let* ((foo 3)) `(,foo)) => (3))
+((let* ((foo 3)) `(bar ,foo)) => (bar 3))
+((let* ((foo 3)) `(bar ,@(list foo 1))) => (bar 3 1))
+((let* ((foo 3)) `(bar `(,foo))) => (bar `(3)))
+((let* ((foo 3)) `(bar ,@(list foo 1))) => (bar 3 1))
 
 ;;; return
 
@@ -131,6 +142,11 @@
 ((len "") => 0)
 ((len "example") => 7)
 
+;;; list
+
+((list) => nil)
+((list 1) => (1))
+
 ;;; backquote/unquote/unqoute-splicing
 
 ((let ((x 123)) `x) => x)
@@ -166,6 +182,14 @@ b
 c")
 
 ((join "foo" '()) => "")
+
+
+;;; cons:join
+
+((cons:join " " '("a" "b" "c")) => ("a" " " "b" " " "c"))
+((cons:join 'r '("a" "b" "c")) => ("a" r "b" r "c"))
+
+((cons:join "foo" '()) => ())
 
 ;;; random "complex" tests
 
@@ -275,3 +299,168 @@ b" "\n") => ("a" "b"))
 ;;     (= n (+ n 2)))
 ;;   n)
 ;; => 20)
+
+;;functions
+(
+ ((fun-switch-binary-params -) 2 3) => 1)
+
+( ((curry + "foo") "bar")
+=> "foobar")
+
+( ((curry-2nd + "foo") "bar")
+=> "barfoo")
+
+
+;; seq.lisp
+
+((binary-classify
+  (lambda (e) (equal e 4))
+  '(1 1 4 4))
+ => ((4 4) (1 1)))
+
+;; TODO Hauke's tests
+
+;; ((destructuring-bind-parse 'target 0) => ((target 0))) ; ((progn (destructuring-bind-parse 'target 0)) '((target 0)))
+;; ((destructuring-bind-parse '(targeta targetb) 'value) => ((targeta (nth 0 value)) (targetb (nth 1 value)))) ; ((progn (destructuring-bind-parse '(targeta targetb) 'value)) '((targeta (nth 0 value)) (targetb (nth 1 value))))
+;; ((destructuring-bind-parse '(targeta (targetb targetc)) 'value) => ((targeta (nth 0 value)) (targetb (nth 0 (nth 1 value))) (targetc (nth 1 (nth 1 value))))) ; ((progn (destructuring-bind-parse '(targeta (targetb targetc)) 'value)) '((targeta (nth 0 value)) (targetb (nth 0 (nth 1 value))) (targetc (nth 1 (nth 1 value)))))
+;; ((destructuring-bind-parse '((targeta targetb) targetc) 'value) => ((targeta (nth 0 (nth 0 value))) (targetb (nth 1 (nth 0 value))) (targetc (nth 1 value)))) ; ((progn (destructuring-bind-parse '((targeta targetb) targetc) 'value)) '((targeta (nth 0 (nth 0 value))) (targetb (nth 1 (nth 0 value))) (targetc (nth 1 value))))
+
+((progn (def target nil) ; TODO support (def target)
+        (= target 0)
+        target) => 0) ; ((progn (def target) (= target 0) target) 0)
+
+
+;; TODO implement assignment destructuring
+;; ((progn (def targeta) (def targetb) (setf (:= targeta targetb) '(1 2)) (list targeta targetb)) => (1 2)) ; ((progn (def targeta) (def targetb) (setf (:= targeta targetb) '(1 2)) (list targeta targetb)) '(1 2))
+;; ((let* ((l (list 1))) (setf (aref l 0) 0) l) => (0)) ; ((progn (let* ((l (list 1))) (setf (aref l 0) 0) l)) '(0))
+;;((let* ((l (dict :foo 1))) (setf (aref l :foo) 0) l) => (dict :foo 0)) ; ((progn (let* ((l (dict :foo 1))) (setf (aref l :foo) 0) l)) (dict :foo 0))
+((let ((foo 3)) foo) => 3) ; ((progn (let ((foo 3)) foo)) 3)
+((let (((foo bar) (list 0 1))) (list foo bar)) => (0 1)) ; ((progn (let (((:= foo bar) (list 0 1))) (list foo bar))) '(0 1))
+((let ((foo 3)) `(bar (+ ,foo 1))) => (bar (+ 3 1))) ; ((progn (let ((foo 3)) `(bar (+ ,foo 1)))) '(bar (+ 3 1)))
+
+((nth 1 '(1 2 3)) => 2) ; ((progn (nth 1 '(1 2 3))) 2)
+
+((car '(1 2 3)) => 1) ; ((progn (car '(1 2 3))) 1)
+((cdr '(1 2 3)) => (2 3)) ; ((progn (cdr '(1 2 3))) '(2 3))
+
+((reversed '(1 2 3)) => (3 2 1)) ; ((progn (reversed '(1 2 3))) '(3 2 1))
+
+((let ((l 'nil)) (append l (list 3))) => (3)) ; ((progn (let ((l 'nil)) (cons:append l (list 3)))) '(3))
+((let ((l '(1))) (append l (list 3))) => (1 3)) ; ((progn (let ((l '(1))) (cons:append l (list 3)))) '(1 3))
+((+ 1 2) => 3) ; ((progn (+ 1 2)) 3)
+((+ 1 2 3) => 6)
+(`(list ,1) => (list 1)) ; ((progn `(list ,1)) '(list 1))
+((progn (defmacro test (a) `(list ,a)) (test 1)) => (1)) ; ((progn (defmacro test (a) `(list ,a)) (test 1)) '(1))
+((let* ((foo 3)) (+= foo 1)) => 4) ; ((progn (let* ((foo 3)) (+= foo 1))) 4)
+((let* ((foo 3)) (+= foo 1 2)) => 6) ; ((progn (let* ((foo 3)) (+= foo 1 2))) 6)
+((let* ((foo 3) (bar 2)) (+= foo 1 bar)) => 6) ; ((progn (let* ((foo 3) (bar 2)) (+= foo 1 bar))) 6)
+((let* ((foo 3)) (+= foo 1)) => 4) ; ((progn (let* ((foo 3)) (+= foo 1))) 4)
+((let* ((foo 3)) (+= foo 1 2)) => 6) ; ((progn (let* ((foo 3)) (+= foo 1 2))) 6)
+((let* ((foo 3) (bar 2)) (+= foo 1 bar)) => 6) ; ((progn (let* ((foo 3) (bar 2)) (+= foo 1 bar))) 6)
+((let* ((foo 3)) (-= foo 1)) => 2) ; ((progn (let* ((foo 3)) (-= foo 1))) 2)
+((let* ((foo 3)) (-= foo 1 2)) => 0) ; ((progn (let* ((foo 3)) (-= foo 1 2))) 0)
+((let* ((foo 3) (bar 2)) (-= foo 1 bar)) => 0) ; ((progn (let* ((foo 3) (bar 2)) (-= foo 1 bar))) 0)
+((let* ((foo 3)) (*= foo 2)) => 6) ; ((progn (let* ((foo 3)) (*= foo 2))) 6)
+((let* ((foo 3)) (*= foo 1 2)) => 6) ; ((progn (let* ((foo 3)) (*= foo 1 2))) 6)
+((let* ((foo 3) (bar 2)) (*= foo 1 bar)) => 6) ; ((progn (let* ((foo 3) (bar 2)) (*= foo 1 bar))) 6)
+((let* ((foo 6)) (/= foo 2)) => 3) ; ((progn (let* ((foo 6)) (/= foo 2))) 3)
+((let* ((foo 6)) (/= foo 1 2)) => 3) ; ((progn (let* ((foo 6)) (/= foo 1 2))) 3)
+((let* ((foo 6) (bar 2)) (/= foo 1 bar)) => 3) ; ((progn (let* ((foo 6) (bar 2)) (/= foo 1 bar))) 3)
+
+((when nil 1) => nil) ; ((progn (when false 1)) nil)
+((when 1 1) => 1) ; ((progn (when 1 1)) 1)
+((progn (def b 'nil) (if b b 3)) => 3) ; ((progn (def b 'nil) (if b b 3)) 3)
+
+(((lambda (a) (+ a 2)) 1) => 3) ; ((progn ((lambda (a) (+ a 2)) 1)) 3)
+((apply (lambda (a) (+ a 2)) '(1)) => 3) ; ((progn (apply (lambda (a) (+ a 2)) '(1))) 3)
+((apply (lambda (a) a) (list 'foo)) => foo) ; ((progn (apply (lambda (a) a) (list 'foo))) 'foo)
+((apply (lambda (a) a) (list 'foo)) => foo) ; ((progn (apply (lambda (a) a) (list 'foo))) 'foo)
+(((lambda (a) (+ a 2)) 1) => 3) ; ((progn ((lambda (a) (+ a 2)) 1)) 3)
+(((lambda (a . b) (+ a 2)) 1) => 3) ; ((progn ((lambda (a &rest b) (+ a 2)) 1)) 3)
+(((lambda (a . b) (+ a 2)) 1 2) => 3) ; ((progn ((lambda (a . b) (+ a 2)) 1 2)) 3)
+(((lambda (a . b) (if b (car b) a)) 1) => 1) ; ((progn ((lambda (a . b) (if b (car b) a)) 1)) 1)
+(((lambda (a . b) (if b (car b) a)) 1 2) => 2) ; ((progn ((lambda (a . b) (if b (car b) a)) 1 2)) 2)
+(((lambda (a . b) (+ a (if b (car b) 2))) 1 2) => 3) ; ((progn ((lambda (a . b) (+ a (if b (car b) 2))) 1 2)) 3)
+(((lambda (a) a) (+ 1 2)) => 3) ; ((progn ((lambda (a) a) (+ 1 2))) 3)
+(((lambda (a) a) (car '(3 2 1))) => 3) ; ((progn ((lambda (a) a) (car '(3 2 1)))) 3)
+(((lambda (a) a) (cdr '(3 2 1))) => (2 1)) ; ((progn ((lambda (a) a) (cdr '(3 2 1)))) '(2 1))
+((progn (def foo 2) (set foo 1)) => 1) ; ((progn (def foo 2) (set foo 1)) 1)
+((def foo 1) => 1) ; ((progn (def foo 1)) 1)
+((progn (def foo 1) foo) => 1) ; ((progn (def foo 1) foo) 1)
+((progn (def foo 1) (set foo 2) foo) => 2) ; ((progn (def foo 1) (set foo 2) foo) 2)
+((progn (def foo 1) (set foo 'nil) foo) => nil) ; ((progn (def foo 1) (set foo 'nil) foo) 'nil)
+((progn (def foo (list 1 2)) foo) => (1 2)) ; ((progn (def foo (list 1 2)) foo) '(1 2))
+
+((eval 1) => 1) ; ((progn (eval 1)) 1)
+((eval 'nil) => nil) ; ((progn (eval 'nil)) 'nil)
+((eval (+ 1 2)) => 3) ; ((progn (eval (+ 1 2))) 3)
+((progn (def foo) (setf foo (+ 1 2)) foo) => 3) ; ((progn (def foo) (setf foo (+ 1 2)) foo) 3)
+((progn (def foo0) (def foo1) (def foo2) (setf (:= foo0 foo1 foo2) '(0 1 2)) (list foo2 foo1 foo0)) => (2 1 0)) ; ((progn (def foo0) (def foo1) (def foo2) (setf (:= foo0 foo1 foo2) '(0 1 2)) (list foo2 foo1 foo0)) '(2 1 0))
+
+((progn (defun foo nil nil) (foo)) => nil) ; ((progn (defun foo nil nil) (foo)) nil)
+((progn (defun foo nil 1) (foo)) => 1) ; ((progn (defun foo nil 1) (foo)) 1)
+((progn (defun foo nil (+ 1 2)) (foo)) => 3) ; ((progn (defun foo nil (+ 1 2)) (foo)) 3)
+((progn (defun foo (a) (+ a 2)) (foo 1)) => 3) ; ((progn (defun foo (a) (+ a 2)) (foo 1)) 3)
+((progn (defun foo (b) (def a (+ 1 2)) (* a b)) (foo 4)) => 12) ; ((progn (defun foo (b) (def a (+ 1 2)) (* a b)) (foo 4)) 12)
+((progn (defun foo (a b c) (+ a (+ b c))) (foo 1 2 3)) => 6) ; ((progn (defun foo (a b c) (+ a (+ b c))) (foo 1 2 3)) 6)
+((progn (defun foo (a) a) (foo :a 1)) => 1) ; ((progn (defun foo (a) a) (foo :a 1)) 1)
+((progn (defun foo (a) a) (foo :a :b)) => :b) ; ((progn (defun foo (a) a) (foo :a :b)) :b)
+((progn (defun foo (a) a) (foo :a :a)) => :a) ; ((progn (defun foo (a) a) (foo :a :a)) :a)
+((progn (defun foo (&nokeys a b) (list a b)) (foo :a 0)) => (:a 0)) ; ((progn (defun foo (&nokeys a b) (list a b)) (foo :a 0)) '(:a 0))
+((progn (defun foo (&keys ks) ks) (foo :a 1)) => (dict :a 1)) ; ((progn (defun foo (&keys ks) ks) (foo :a 1)) (dict :a 1))
+((progn (defun foo (&keys ks) ks) (foo :a 1 :b 2 :c 3)) => (dict :a 1 :b 2 :c 3)) ; ((progn (defun foo (&keys ks) ks) (foo :a 1 :b 2 :c 3)) (dict :a 1 :b 2 :c 3))
+((progn (defun foo (a &keys ks) (list a ks)) (foo 1 :b 2)) => (list 1 (dict :b 2))) ; ((progn (defun foo (a &keys ks) (list a ks)) (foo 1 :b 2)) (list 1 (dict :b 2)))
+((progn (defun foo (a &keys ks) (list a ks)) (foo :a 1 :b 2 :c 3)) => (list 1 (dict :b 2 :c 3))) ; ((progn (defun foo (a &keys ks) (list a ks)) (foo :a 1 :b 2 :c 3)) (list 1 (dict :b 2 :c 3)))
+((progn (defmacro add (a) (list '+ 5 a)) (add 1)) => 6) ; ((progn (defmacro add (a) (list '+ 5 a)) (add 1)) 6)
+((def foo (dict :a 1)) => (dict :a 1)) ; ((progn (def foo (dict :a 1))) (dict :a 1))
+((let ((n 0)) (dolist (i '(0 1 2 3 4)) (set n (+ n i))) n) => 10) ; ((progn (let ((n 0)) (dolist (i '(0 1 2 3 4)) (set n (+ n i))) n)) 10)
+((let ((n 3)) (dolist (i 'nil) (set n (+ n i))) n) => 3) ; ((progn (let ((n 3)) (dolist (i 'nil) (set n (+ n i))) n)) 3)
+((let ((n nil)) (dolist (i '(foo bar baz)) (when (eq i 'foo) (set n i))) n) => foo) ; ((progn (let ((n nil)) (dolist (i '(foo bar baz)) (when (eq i 'foo) (set n i))) n)) 'foo)
+((let ((r 'nil)) (dolist (i '(0 1 2 3 4)) (set r (cons:append r (cons i nil)))) r) => (0 1 2 3 4)) ; ((progn (let ((r 'nil)) (dolist (i '(0 1 2 3 4)) (set r (cons:append r (cons i nil)))) r)) '(0 1 2 3 4))
+((foldr + 0 '(0 1 2 3 4)) => 10) ; ((progn (foldr + 0 '(0 1 2 3 4))) 10)
+((let ((x 5)) (cond ((< x 3) 7) (true 1))) => 1) ; ((progn (let ((x 5)) (cond ((< x 3) 7) (true 1)))) 1)
+((let ((x 5)) (cond ((< x 3) 5) ((< x 9) 7) (true 1))) => 7) ; ((progn (let ((x 5)) (cond ((< x 3) 5) ((< x 9) 7) (true 1)))) 7)
+((let ((x 5)) (cond ((< x 3) 5) ((< x 9) 7))) => 7) ; ((progn (let ((x 5)) (cond ((< x 3) 5) ((< x 9) 7)))) 7)
+((block foo (return-from foo)) => nil) ; ((progn (block foo (return-from foo))) nil)
+((block foo (return-from foo nil)) => nil) ; ((progn (block foo (return-from foo nil))) nil)
+((block foo (return-from foo 1)) => 1) ; ((progn (block foo (return-from foo 1))) 1)
+((block test (return-from test nil)) => nil) ; ((progn (block test (return-from test nil))) nil)
+((block test (return-from test 1)) => 1) ; ((progn (block test (return-from test 1))) 1)
+((block nil (break nil)) => nil) ; ((progn (block nil (break nil))) nil)
+((block nil (break 1)) => 1) ; ((progn (block nil (break 1))) 1)
+((map (lambda (e) (+ e 1)) '(0 1 2)) => (1 2 3)) ; ((progn (map (lambda (e) (+ e 1)) '(0 1 2))) '(1 2 3))
+((list :a) => (:a)) ; ((progn (list :a)) '(:a))
+((list :a 0) => (:a 0)) ; ((progn (list :a 0)) '(:a 0))
+((progn (defun foo (a) a) (foo :a)) => :a) ; ((progn (defun foo (a) a) (foo :a)) :a)
+((progn (defun foo (a b) a) (foo &nokeys :a 0)) => :a) ; ((progn (defun foo (a b) a) (foo &nokeys :a 0)) :a)
+((range 4) => (0 1 2 3)) ; ((progn (range 4)) '(0 1 2 3))
+((range 0 4) => (0 1 2 3)) ; ((progn (range 0 4)) '(0 1 2 3))
+((range 1 4) => (1 2 3)) ; ((progn (range 1 4)) '(1 2 3))
+((range 1 4 2) => (1 3)) ; ((progn (range 1 4 2)) '(1 3))
+((range 1 5 3) => (1 4)) ; ((progn (range 1 5 3)) '(1 4))
+((enumerate '(0 1 2)) => ((0 0) (1 1) (2 2))) ; ((progn (enumerate '(0 1 2))) '((0 0) (1 1) (2 2)))
+((enumerate '(foo bar baz)) => ((0 foo) (1 bar) (2 baz))) ; ((progn (enumerate '(foo bar baz))) '((0 foo) (1 bar) (2 baz)))
+((zip '(0 1 2) '(foo bar baz)) => ((0 foo) (1 bar) (2 baz))) ; ((progn (zip '(0 1 2) '(foo bar baz))) '((0 foo) (1 bar) (2 baz)))
+((zip '(0 1 2 3 4) '(foo bar baz)) => ((0 foo) (1 bar) (2 baz))) ; ((progn (zip '(0 1 2 3 4) '(foo bar baz))) '((0 foo) (1 bar) (2 baz)))
+((zip '(0 1 2 3) '(foo bar baz)) => ((0 foo) (1 bar) (2 baz))) ; ((progn (zip '(0 1 2 3) '(foo bar baz))) '((0 foo) (1 bar) (2 baz)))
+((zip (range 3) '(foo bar baz)) => ((0 foo) (1 bar) (2 baz))) ; ((progn (zip (range 3) '(foo bar baz))) '((0 foo) (1 bar) (2 baz)))
+((zip (range 5) '(foo bar baz)) => ((0 foo) (1 bar) (2 baz))) ; ((progn (zip (range 5) '(foo bar baz))) '((0 foo) (1 bar) (2 baz)))
+((zip (range 3) '(foo bar baz biz)) => ((0 foo) (1 bar) (2 baz))) ; ((progn (zip (range 3) '(foo bar baz biz))) '((0 foo) (1 bar) (2 baz)))
+((dolist (i (range 99))) => nil) ; ((progn (dolist (i (range 99)))) nil)
+((slice (range 9) 3) => (0 1 2)) ; ((progn (slice (range 9) 3)) '(0 1 2))
+((slice (range 9) 3 7) => (3 4 5 6)) ; ((progn (slice (range 9) 3 7)) '(3 4 5 6))
+((slice (range 9) 3 -2) => (3 4 5 6)) ; ((progn (slice (range 9) 3 -2)) '(3 4 5 6))
+((slice (range 9) 3 7 2) => (3 5)) ; ((progn (slice (range 9) 3 7 2)) '(3 5))
+((slice (range 3) -1) => (0 1)) ; ((progn (slice (range 3) -1)) '(0 1))
+((slice (range 9) -8) => (0)) ; ((progn (slice (range 9) -8)) '(0))
+((slice (range 9) -7) => (0 1)) ; ((progn (slice (range 9) -7)) '(0 1))
+((slice (range 9) -3 -1) => (6 7)) ; ((progn (slice (range 9) -3 -1)) '(6 7))
+((slice (range 9) -3 0) => (6 7 8)) ; ((progn (slice (range 9) -3 0)) '(6 7 8))
+((map-apply (lambda (a) a) '((1))) => (1)) ; ((progn (map-apply (lambda (a) a) '((1)))) '(1))
+((map-apply (lambda (a b) (+ a b)) '((1 2))) => (3)) ; ((progn (map-apply (lambda (a b) (+ a b)) '((1 2)))) '(3))
+((map-apply (lambda (var val) (assert (symbol? var) (repr var)) (list 'set var val)) (destructuring-bind-parse '(a b) 'value)) => ((set a (nth 0 value)) (set b (nth 1 value)))) ; ((progn (map-apply (lambda (var val) (assert (symbol? var) (repr var)) (list 'set var val)) (destructuring-bind-parse '(a b) 'value))) '((set a (nth 0 value)) (set b (nth 1 value))))
+((`(foo ,((lambda nil 'test)))) => (list 'foo 'test)) ; ((`(foo ,((lambda nil 'test)))) (list 'foo 'test))
+((progn (defmacro foo (a b c) `(bar 1 2 ,c)) (macroexpand-1 '(foo 4 8 3))) => (bar 1 2 3)) ; ((progn (defmacro foo (a b c) `(bar 1 2 ,c)) (macroexpand-1 '(foo 4 8 3))) '(bar 1 2 3))
+((backquote-internal '(defmacro ,name (var . args) `foo) false) => (list (list 'defmacro name (list 'var '. 'args) (list 'backquote 'foo)))) ; ((progn (backquote-internal '(defmacro ,name (var . args) `foo) false)) '(list (list 'defmacro name (list 'var '. 'args) (list 'backquote 'foo))))
+((backquote-internal '(defmacro ,name (var . args) `(setf ,,var (apply ,op (list ,,var ,(unquote-splicing args))))) false) => (list (list 'defmacro name (list 'var '. 'args) (list 'backquote (list 'setf ',var (list 'apply op (list 'list ',var '(unquote-splicing args)))))))) ; ((progn (backquote-internal '(defmacro ,name (var . args) `(setf ,,var (apply ,op (list ,,var ,(unquote-splicing args))))) false)) '(list (list 'defmacro name (list 'var '. 'args) (list 'backquote (list 'setf ',var (list 'apply op (list 'list ',var '(unquote-splicing args))))))))
+((macroexpand-1 '(setf (:= targeta targetb) '(0 1))) => (progn (def __setf-value-1593 '(0 1)) (set targeta (nth 0 __setf-value-1593)) (set targetb (nth 1 __setf-value-1593)))) ; ((progn (macroexpand-1 '(setf (:= targeta targetb) '(0 1)))) '(progn (def __setf-value-1593 '(0 1)) (set targeta (nth 0 __setf-value-1593)) (set targetb (nth 1 __setf-value-1593))))

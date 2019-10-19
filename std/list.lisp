@@ -25,3 +25,9 @@
   (if seq
       (cons (fun (car seq))
             (map fun (cdr seq)))))
+
+(defun reversed (seq)
+  (let ((ret nil))
+    (dolist (elt seq)
+      (push elt ret))
+    ret))

@@ -1,19 +1,19 @@
 
 ;; somewhat meta/unstable
-(defun type (x)
-  (let ((t (meta:expr-type x)))
-    (cond
-      ((eq t  0) 'nil)
-      ((eq t  1) 'gensym)
-      ((eq t  2) 'fixnum)
-      ((eq t  3) 'symbol)
-      ((eq t  4) 'cons)
-      ((eq t  5) 'string)
-      ((eq t  9) 'vector)
-      ((eq t 10) 'builtin)
-      ((eq t 11) 'stream)
-      (t
-       (error "type not implemented for " x t)))))
+;;(defun type (x)
+;;  (let ((t (meta:expr-type x)))
+;;    (cond
+;;      ((eq t  0) 'nil)
+;;      ((eq t  1) 'gensym)
+;;      ((eq t  2) 'fixnum)
+;;      ((eq t  3) 'symbol)
+;;      ((eq t  4) 'cons)
+;;      ((eq t  5) 'string)
+;;      ((eq t  9) 'vector)
+;;      ((eq t 10) 'builtin)
+;;      ((eq t 11) 'stream)
+;;      (t
+;;       (error "type not implemented for " x t)))))
 
 (defun nil? (x)
   (eq 'nil x))

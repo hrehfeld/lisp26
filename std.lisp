@@ -49,31 +49,22 @@
 
 ;; comparison
 
-(def == fixnum:eq) ;; TODO
+(def == equal)
 
-;;(def !=  fixnum:ne) ; TODO get rid of fixnum:ne etc
 (defun != (x y) ; TODO varargs
   (not (== x y)))
 
-;;(def < fixnum:lt)
 (defun < args
   (cond ((fixnum? (car args)) (apply fixnum:lt args))
         ((string? (car args)) (apply string:lt args))
         (t (error "cannot compare" args))))
 
-;;(def > fixnum:gt);
 (defun > (x y)
   (< y x))
 
-;;(def <= fixnum:le)
-;;(defun <= (x y)
-;;  (or (< x y) (== x y)))
 (defun <= (x y)
   (not (> x y)))
 
-;;(def >= fixnum:ge)
-;;(defun >= (x y)
-;;  (<= y x))
 (defun >= (x y)
   (not (< x y)))
 
@@ -107,17 +98,17 @@
 
 ;;; assignment
 
-(defmacro += (var val)
-  `(= ,var (+ ,var ,val)))
+(defmacro += (var . vals)
+  `(= ,var (+ ,var ,@vals)))
 
-(defmacro -= (var val)
-  `(= ,var (- ,var ,val)))
+(defmacro -= (var . vals)
+  `(= ,var (- ,var ,@vals)))
 
-(defmacro *= (var val)
-  `(= ,var (* ,var ,val)))
+(defmacro *= (var . vals)
+  `(= ,var (* ,var ,@vals)))
 
-(defmacro /= (var val)
-  `(= ,var (/ ,var ,val)))
+(defmacro /= (var . vals)
+  `(= ,var (/ ,var ,@vals)))
 
 ;; TODO do we want to (define *special*) first?
 ;;(define *special* nil)
@@ -202,6 +193,9 @@
 (defun reverse (seq)
   (nreverse (seq:copy seq)))
 
+(defmacro doseq args
+  `(dolist ,@args))
+
 (defun join (sep seq)
   (let ((ret "")
         (1st 't))
@@ -211,6 +205,18 @@
           (= ret (string-add ret sep)))
       (= ret (string-add ret elt)))
     ret))
+
+(defun cons:join:no-empty-check (sep seq)
+  (let ((head (car seq))
+        (tail (cdr seq)))
+    (if (eq tail nil)
+        (cons head nil)
+      (cons head
+            (cons sep
+                  (cons:join sep (cdr seq)))))))
+
+(defun cons:join (sep seq)
+  (when seq (cons:join:no-empty-check sep seq)))
 
 (defmacro error args
   `(throw nil (list '#:error ,@args)))
@@ -229,11 +235,11 @@
       (read-from-stream (car args))
       (read-from-stream *read-stream*)))
 
-(defun nth (exp idx)
+(defun nth (idx exp)
   (cond ((cons? exp) ; TODO use while and count down index?
          (if (== idx 0)
              (car exp)
-             (nth (cdr exp) (- idx 1))))
+             (nth (- idx 1) (cdr exp))))
 
         ((vector? exp)
          (vector-get exp idx))
@@ -323,10 +329,17 @@
 
 (load-file "std/seq.lisp")
 
+(defun cons:index (seq sub)
+  (if (== (car seq) sub)
+      t
+    (let ((tail (cdr seq)))
+      (when tail (cons:index tail sub)))))
+
 (defun index (seq sub)
   (cond ((string? seq)
          (string:index seq sub))
-
+        ((cons? seq)
+         (cons:index seq sub))
         (t
          (error))))
 
@@ -370,15 +383,15 @@
 ;;        (v (gensym)))
 ;;    `(let ((,v ,seq))
 ;;       (dolen-1 (,i ,v)
-;;         (let ((,a (nth ,v ,i))
-;;               (,b (nth ,v (+ ,i 1))))
+;;         (let ((,a (nth ,i ,v))
+;;               (,b (nth (+ ,i 1) ,v)))
 ;;           ,@body)))))
 
 (defun sorted? (vec)
   ;;(dotimes (i (- (len vec) 1))
   (dolen-1 (i vec)
     ;;(println i)
-    (if (> (nth vec i) (nth vec (+ i 1)))
+    (if (> (nth i vec) (nth (+ i 1) vec))
         (return nil)))
   t)
 
@@ -405,3 +418,17 @@
 ;; ;)
 (defmacro printf (fmt . args)
   `(format t ,fmt ,@args))
+
+
+;;functions
+;; TODO move to std/functional or std/algorithm
+(defun fun-switch-binary-params (f)
+  (lambda (a b) (f b a)))
+
+(defun curry (f . curried-args)
+  (lambda args (apply f `(,@curried-args ,@args))))
+
+(defun curry-2nd (f arg)
+  (lambda args (apply f `(,@args ,arg))))
+
+(load-file "std/sort.lisp")

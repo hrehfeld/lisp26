@@ -10,13 +10,6 @@ Expr make_truth(Bool b)
     return nil;
 }
 
-Bool is_tagged(Expr exp, Expr tag)
-{
-    return is_cons(exp) &&
-        is_cons(car(exp)) &&
-        caar(exp) == tag;
-}
-
 /* TODO this is unfinished */
 /* TODO we could implement this in std.lisp */
 Bool equal(Expr a, Expr b)
@@ -114,6 +107,10 @@ Expr f_type(Expr exp)
         return SYM_cons;
     case TYPE_STRING:
         return SYM_string;
+#if ENABLE_FLOAT
+    case TYPE_FLOAT:
+        return QUOTE(float);
+#endif
     case TYPE_POINTER:
         return QUOTE(pointer);
     case TYPE_FIXPTR:

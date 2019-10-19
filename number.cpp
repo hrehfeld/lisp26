@@ -47,6 +47,37 @@ static Expr _normalize(Expr num)
 
 #endif
 
+Bool number_equal(Expr a, Expr b)
+{
+    if (is_fixnum(a) && is_fixnum(b))
+    {
+        return a == b;
+    }
+
+    ERROR("cannot compare %s and %s", repr(a), repr(b));
+    return 0;
+}
+
+Expr number_neg(Expr a)
+{
+#if ENABLE_FIXNUM
+    if (is_fixnum(a))
+    {
+        //TODO: convert smallest/largest fixnum to bignum
+        return fixnum_neg(a);
+    }
+#endif
+
+#if ENABLE_BIGNUM
+    if (is_bignum(a))
+    {
+        return _normalize(bignum_neg(a));
+    }
+#endif
+    return ERROR("cannot neg %s", repr(a));
+}
+
+
 Expr number_add(Expr a, Expr b)
 {
 #if ENABLE_BIGNUM

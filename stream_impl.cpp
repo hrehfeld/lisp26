@@ -32,7 +32,7 @@ static void ensure_capacity(Stream * stream, size_t cap)
     }
 }
 
-void _make_file_input_stream(Stream * stream, FILE * file, Bool close_on_free)
+void _make_file_input_stream(Stream * stream, FILE * file, char const * name, Bool close_on_free)
 {
     ASSERT(stream);
 
@@ -42,9 +42,14 @@ void _make_file_input_stream(Stream * stream, FILE * file, Bool close_on_free)
         STREAM_TYPE_FILE_INPUT_CLOSE :
         STREAM_TYPE_FILE_INPUT;
     stream->file = file;
+
+    if (name)
+    {
+        stream->name = strdup(name);
+    }
 }
 
-void _make_file_output_stream(Stream * stream, FILE * file, Bool close_on_free)
+void _make_file_output_stream(Stream * stream, FILE * file, char const * name, Bool close_on_free)
 {
     ASSERT(stream);
 
@@ -54,6 +59,11 @@ void _make_file_output_stream(Stream * stream, FILE * file, Bool close_on_free)
         STREAM_TYPE_FILE_OUTPUT_CLOSE :
         STREAM_TYPE_FILE_OUTPUT;
     stream->file = file;
+
+    if (name)
+    {
+        stream->name = strdup(name);
+    }
 }
 
 // TODO add option to copy the value?
@@ -101,7 +111,22 @@ void _free_stream(Stream * stream)
         break;
     }
 
+    if (stream->name)
+    {
+        free(stream->name);
+    }
+
     memset(stream, 0, sizeof(Stream));
+}
+
+char const * _stream_name(Stream * stream)
+{
+    return stream->name;
+}
+
+I64 _stream_offset(Stream * stream)
+{
+    return stream->offset;
 }
 
 void _stream_put_cstring(Stream * out, char const * str)
@@ -279,11 +304,13 @@ void _stream_skip_char(Stream * in)
     case STREAM_TYPE_FILE_INPUT:
     case STREAM_TYPE_FILE_INPUT_CLOSE:
         getc(in->file);
+        ++in->offset; // TODO check for EOF?
         break;
     case STREAM_TYPE_STRING_INPUT:
         if (in->pos < in->cap)
         {
             ++in->pos;
+            ++in->offset;
         }
         break;
     default:

@@ -26,7 +26,7 @@
 
     (let ((ret nil))
       (dorange (i lo hi st)
-               (push (nth seq i) ret))
+               (push (nth i seq) ret))
 
       (= ret (nreverse ret))
 
@@ -63,3 +63,16 @@
 ;;  (list:len seq))
 ;;
 ;;(defmethod len ((nil seq)) 0)
+
+
+
+;; todo maybe rename
+(defun binary-classify (pred seq)
+  (let ((a '())
+        (b '()))
+    (dolist (elt seq)
+                                        ;(println elt (pred elt) a b)
+      (if (pred elt)
+          (push elt a)
+        (push elt b)))
+    (list (nreverse a) (nreverse b))))
